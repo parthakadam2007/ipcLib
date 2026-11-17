@@ -294,7 +294,7 @@ export const NamedPipeSimulator = () => {
           </div>
 
           <CommunicationChannel
-            title={`Filesystem FIFO [${fifoSnapshot.fifoPath}] (inode: ${fifoSnapshot.inode})`}
+            title={`Named Pipe (${fifoSnapshot.fifoPath})`}
             channelType="fifo"
             capacity={capacity}
             currentCount={fifoSnapshot.bufferLength}
@@ -311,7 +311,7 @@ export const NamedPipeSimulator = () => {
                       {fifoSnapshot.buffer}
                     </span>
                   ) : (
-                    <span className="text-slate-400 italic font-sans text-xs">FIFO buffer empty</span>
+                    <span className="text-slate-400 italic font-sans text-xs">Buffer empty</span>
                   )}
                 </div>
               </div>
@@ -329,12 +329,12 @@ export const NamedPipeSimulator = () => {
 
         <div className="lg:col-span-4 space-y-4">
           <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-dark-900/90 shadow-sm backdrop-blur-md space-y-3.5 text-xs transition-colors">
-            <h4 className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs pb-2.5 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
-              <FolderOpen className="w-4 h-4 text-sky-600 dark:text-cyan-400" /> Filesystem Settings
+            <h4 className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs pb-2 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
+              <FolderOpen className="w-4 h-4 text-sky-600 dark:text-cyan-400" /> Settings
             </h4>
 
             <div>
-              <label className="text-[11px] font-medium text-slate-500 dark:text-slate-400 block mb-1">FIFO Inode Path:</label>
+              <label className="text-[11px] font-medium text-slate-500 dark:text-slate-400 block mb-1">Path:</label>
               <input
                 type="text"
                 value={fifoPath}
@@ -344,7 +344,7 @@ export const NamedPipeSimulator = () => {
             </div>
 
             <div>
-              <label className="text-[11px] font-medium text-slate-500 dark:text-slate-400 block mb-1">Payload String:</label>
+              <label className="text-[11px] font-medium text-slate-500 dark:text-slate-400 block mb-1">Message:</label>
               <input
                 type="text"
                 value={messageText}

@@ -259,7 +259,7 @@ export const PipesSimulator = () => {
                     className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs transition-all shadow-md shadow-sky-600/20 disabled:opacity-50"
                   >
                     <Send className="w-3.5 h-3.5" />
-                    <span>write(fd[1], {chunkSize}B)</span>
+                    <span>Write ({chunkSize}B)</span>
                   </button>
                 </div>
               }
@@ -268,7 +268,7 @@ export const PipesSimulator = () => {
             <ProcessNode
               process={p2}
               isHighlighted={p2.state === PROCESS_STATES.RUNNING}
-              roleLabel="Child Process (fd[0] Reader)"
+              roleLabel="Child (Reader)"
               extraDetails={
                 <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800">
                   <button
@@ -277,7 +277,7 @@ export const PipesSimulator = () => {
                     className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-all shadow-md shadow-emerald-600/20 disabled:opacity-50"
                   >
                     <ArrowDownLeft className="w-3.5 h-3.5" />
-                    <span>read(fd[0], {chunkSize}B)</span>
+                    <span>Read ({chunkSize}B)</span>
                   </button>
                 </div>
               }
@@ -285,7 +285,7 @@ export const PipesSimulator = () => {
           </div>
 
           <CommunicationChannel
-            title="Kernel Pipe Ring Buffer"
+            title="Pipe Buffer"
             channelType="pipe"
             capacity={capacity}
             currentCount={pipeSnapshot.length}
@@ -295,8 +295,8 @@ export const PipesSimulator = () => {
             customChildren={
               <div className="w-full space-y-2 my-2">
                 <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 font-medium px-2">
-                  <span>Write Influx (fd[1])</span>
-                  <span>Read Outflow (fd[0])</span>
+                  <span>Write (fd[1])</span>
+                  <span>Read (fd[0])</span>
                 </div>
                 <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-slate-800 font-mono text-xs text-slate-700 dark:text-slate-300 min-h-[55px] flex items-center shadow-2xs">
                   {pipeSnapshot.buffer.length > 0 ? (
@@ -304,7 +304,7 @@ export const PipesSimulator = () => {
                       {pipeSnapshot.buffer}
                     </span>
                   ) : (
-                    <span className="text-slate-400 dark:text-slate-500 italic font-sans text-xs">Pipe buffer is empty [0 bytes]</span>
+                    <span className="text-slate-400 dark:text-slate-500 italic font-sans text-xs">Empty [0 bytes]</span>
                   )}
                 </div>
               </div>

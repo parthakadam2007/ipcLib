@@ -14,23 +14,16 @@ export const Navbar = ({
       {/* Brand & Active Simulation breadcrumb */}
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white font-bold shadow-md shadow-sky-500/20">
-            <Cpu className="w-5 h-5 text-white" />
+          <div className="w-8 h-8 rounded-lg bg-sky-600 flex items-center justify-center text-white font-bold shadow-xs">
+            <Cpu className="w-4 h-4 text-white" />
           </div>
-          <div>
-            <span className="font-bold text-sm md:text-base tracking-tight text-slate-900 dark:text-white block">
-              IPC Simulator Lab
-            </span>
-            <span className="text-[10px] text-sky-600 dark:text-sky-400 font-medium -mt-0.5 block flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
-              OS Interactive Learning
-            </span>
-          </div>
+          <span className="font-bold text-sm md:text-base tracking-tight text-slate-900 dark:text-white">
+            IPC Simulator
+          </span>
         </div>
 
         <div className="hidden sm:flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500 pl-3 border-l border-slate-200 dark:border-slate-800">
-          <span className="text-slate-300 dark:text-slate-600">/</span>
-          <span className="text-slate-700 dark:text-slate-200 font-semibold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-dark-850">
+          <span className="text-slate-700 dark:text-slate-200 font-medium">
             {activePageTitle}
           </span>
         </div>
@@ -79,7 +72,7 @@ export const Navbar = ({
             title="Open Simulator Visual Guide"
           >
             <HelpCircle className="w-4 h-4 text-sky-600 dark:text-sky-400" />
-            <span className="hidden md:inline">Visual Guide</span>
+            <span className="hidden md:inline">Guide</span>
           </button>
         )}
 

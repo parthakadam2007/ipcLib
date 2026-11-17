@@ -302,13 +302,12 @@ export const MessageQueueSimulator = () => {
         activeScenarioId={activeScenario}
         onSelectScenario={handleSelectScenario}
         customControls={
-          <div className="flex items-center gap-2 text-xs">
-            <span className="text-slate-500 dark:text-slate-400 font-medium">Ordering:</span>
+          <div className="flex items-center gap-1.5 text-xs">
             <button
               onClick={() => handleModeChange(mode === 'FIFO' ? 'PRIORITY' : 'FIFO')}
-              className="px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-dark-950 border border-slate-200 dark:border-slate-700 text-sky-700 dark:text-cyan-300 font-bold transition-colors shadow-2xs"
+              className="px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-dark-950 border border-slate-200 dark:border-slate-700 text-sky-700 dark:text-cyan-300 font-semibold transition-colors shadow-2xs"
             >
-              {mode === 'FIFO' ? 'FIFO (First-In First-Out)' : 'PRIORITY (Urgent First)'}
+              Mode: {mode === 'FIFO' ? 'FIFO' : 'Priority'}
             </button>
           </div>
         }
@@ -323,7 +322,7 @@ export const MessageQueueSimulator = () => {
             <ProcessNode
               process={p1}
               isHighlighted={p1.state === PROCESS_STATES.RUNNING}
-              roleLabel="Sender Process (mq_send)"
+              roleLabel="Sender"
               extraDetails={
                 <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex gap-2">
                   <button
@@ -332,7 +331,7 @@ export const MessageQueueSimulator = () => {
                     className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs transition-all shadow-md shadow-sky-600/20 disabled:opacity-50"
                   >
                     <Send className="w-3.5 h-3.5" />
-                    <span>Send Message</span>
+                    <span>Send</span>
                   </button>
                 </div>
               }
@@ -341,7 +340,7 @@ export const MessageQueueSimulator = () => {
             <ProcessNode
               process={p2}
               isHighlighted={p2.state === PROCESS_STATES.RUNNING}
-              roleLabel="Receiver Process (mq_receive)"
+              roleLabel="Receiver"
               extraDetails={
                 <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex gap-2">
                   <button
@@ -350,7 +349,7 @@ export const MessageQueueSimulator = () => {
                     className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-all shadow-md shadow-emerald-600/20 disabled:opacity-50"
                   >
                     <ArrowDownLeft className="w-3.5 h-3.5" />
-                    <span>Receive Message</span>
+                    <span>Receive</span>
                   </button>
                 </div>
               }
@@ -359,7 +358,7 @@ export const MessageQueueSimulator = () => {
 
           {/* Central Animated Message Queue Channel */}
           <CommunicationChannel
-            title={`POSIX Message Queue (/lab_queue)`}
+            title="Message Queue"
             channelType="queue"
             capacity={capacity}
             currentCount={queueSnapshot.length}
@@ -369,13 +368,13 @@ export const MessageQueueSimulator = () => {
             customChildren={
               <div className="w-full space-y-2 my-2">
                 <div className="flex items-center justify-between text-xs px-2 text-slate-500 dark:text-slate-400 font-medium">
-                  <span>Front (Next to Dequeue)</span>
-                  <span>Back (Recently Added)</span>
+                  <span>Front (Dequeue)</span>
+                  <span>Back (Enqueue)</span>
                 </div>
                 <div className="flex items-center gap-2.5 overflow-x-auto p-3 bg-slate-50 dark:bg-dark-950/70 rounded-2xl border border-slate-200 dark:border-slate-800/80 min-h-[80px]">
                   {queueSnapshot.items.length === 0 ? (
                     <div className="w-full text-center text-xs text-slate-400 py-3 font-sans">
-                      Queue is currently empty. Click "Send Message" above to enqueue a packet.
+                      Queue is empty.
                     </div>
                   ) : (
                     queueSnapshot.items.map((msg, idx) => (

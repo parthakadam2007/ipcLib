@@ -278,24 +278,21 @@ export const SharedMemorySimulator = () => {
                   <HardDrive className="w-4 h-4" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-tight">
-                    Shared Physical RAM Frame [{shmSnapshot.baseAddress}]
+                  <h4 className="text-xs font-bold text-slate-800 dark:text-white uppercase tracking-tight">
+                    Shared Memory ({shmSnapshot.baseAddress})
                   </h4>
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-                    Zero-copy memory block visible to both Process 1 and Process 2
-                  </span>
                 </div>
               </div>
 
               {/* Mutex State Indicator */}
               <div className="flex items-center gap-2 text-xs">
                 {shmSnapshot.mutex.locked ? (
-                  <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-300 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/40 flex items-center gap-1.5 font-bold shadow-2xs">
-                    <Lock className="w-3.5 h-3.5" /> LOCKED by {shmSnapshot.mutex.holder}
+                  <span className="px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-300 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/40 flex items-center gap-1 font-bold text-xs">
+                    <Lock className="w-3.5 h-3.5" /> Locked ({shmSnapshot.mutex.holder})
                   </span>
                 ) : (
-                  <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/40 flex items-center gap-1.5 font-semibold shadow-2xs">
-                    <Unlock className="w-3.5 h-3.5" /> UNLOCKED (Free to acquire)
+                  <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/40 flex items-center gap-1 font-semibold text-xs">
+                    <Unlock className="w-3.5 h-3.5" /> Unlocked
                   </span>
                 )}
               </div>

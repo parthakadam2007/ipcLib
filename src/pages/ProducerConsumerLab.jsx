@@ -362,27 +362,30 @@ export const ProducerConsumerLab = () => {
 
         <div className="lg:col-span-4 space-y-4">
           <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-dark-900/90 shadow-sm backdrop-blur-md space-y-3.5 text-xs transition-colors">
-            <h4 className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs pb-2.5 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-sky-600 dark:text-cyan-400" /> Synchronization Model
+            <h4 className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs pb-2 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-sky-600 dark:text-cyan-400" /> Buffer Status
             </h4>
 
-            <div className="space-y-2 text-slate-600 dark:text-slate-300">
+            <div className="space-y-1.5 text-slate-600 dark:text-slate-300">
               <div className="flex justify-between">
-                <span>Buffer Slots:</span>
+                <span>Slots:</span>
                 <span className="font-bold text-slate-900 dark:text-white font-mono">{bufferSnapshot.count} / {capacity}</span>
               </div>
               <div className="flex justify-between">
-                <span>Total Produced:</span>
+                <span>Produced:</span>
                 <span className="text-sky-700 dark:text-cyan-400 font-bold font-mono">{bufferSnapshot.producedCount}</span>
               </div>
               <div className="flex justify-between">
-                <span>Total Consumed:</span>
+                <span>Consumed:</span>
                 <span className="text-emerald-700 dark:text-emerald-400 font-bold font-mono">{bufferSnapshot.consumedCount}</span>
               </div>
             </div>
 
-            <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800">
-              <label className="text-[11px] font-medium text-slate-500 dark:text-slate-400 block mb-1">Adjust Buffer Size:</label>
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex justify-between text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-1">
+                <span>Buffer Size</span>
+                <span className="font-bold text-slate-700 dark:text-slate-200">{capacity}</span>
+              </div>
               <input
                 type="range"
                 min="2"

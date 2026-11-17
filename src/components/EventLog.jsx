@@ -37,12 +37,12 @@ export const EventLog = ({
       {/* Header bar */}
       <div className="flex items-center justify-between p-3.5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-dark-850/60">
         <div className="flex items-center gap-2">
-          <Terminal className="w-4 h-4 text-sky-600 dark:text-cyan-400" />
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
-            Execution History
+          <Terminal className="w-3.5 h-3.5 text-sky-600 dark:text-cyan-400" />
+          <h3 className="text-xs font-bold text-slate-800 dark:text-white">
+            Log
           </h3>
-          <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-medium bg-sky-100 text-sky-700 dark:bg-cyan-500/10 dark:text-cyan-300 dark:border dark:border-cyan-500/20">
-            {events.length} steps
+          <span className="px-1.5 py-0.2 rounded-full text-[10px] font-mono font-medium bg-slate-100 text-slate-600 dark:bg-dark-950 dark:text-slate-400 border border-slate-200 dark:border-slate-800">
+            {events.length}
           </span>
         </div>
 

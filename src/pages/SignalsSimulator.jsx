@@ -205,18 +205,13 @@ export const SignalsSimulator = () => {
           {/* Signal Dispatcher Visual Banner */}
           <div className="rounded-2xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-dark-900/90 p-4 shadow-sm backdrop-blur-md transition-colors">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 text-rose-600 dark:text-rose-400">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 text-rose-600 dark:text-rose-400">
                   <Zap className="w-4 h-4" />
                 </div>
-                <div>
-                  <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-tight">
-                    Software Interrupt Dispatcher
-                  </h4>
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-                    Pick a signal below to interrupt the target process
-                  </span>
-                </div>
+                <h4 className="text-xs font-bold text-slate-800 dark:text-white uppercase tracking-tight">
+                  Signal Dispatcher
+                </h4>
               </div>
 
               {inFlightSignal && (

@@ -37,7 +37,7 @@ export const SimulationControls = ({
             title="Run continuous simulation"
           >
             <Play className="w-3.5 h-3.5 fill-current" />
-            <span>Auto Run</span>
+            <span>Run</span>
           </button>
         )}
 
@@ -49,10 +49,10 @@ export const SimulationControls = ({
               ? 'bg-slate-100 dark:bg-dark-950 text-slate-400 border-slate-200 dark:border-slate-800 cursor-not-allowed opacity-60'
               : 'bg-sky-50 hover:bg-sky-100 text-sky-700 border-sky-200 dark:bg-dark-850 dark:hover:bg-dark-750 dark:text-cyan-300 dark:border-cyan-500/40 shadow-2xs font-semibold'
           }`}
-          title="Execute exactly one logical step"
+          title="Execute one step"
         >
           <SkipForward className="w-3.5 h-3.5" />
-          <span>Step Once</span>
+          <span>Step</span>
         </button>
 
         <button
@@ -66,16 +66,13 @@ export const SimulationControls = ({
       </div>
 
       {/* Speed Controls */}
-      <div className="flex items-center gap-2 border-l border-r border-slate-200 dark:border-slate-800 px-3">
-        <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1 font-medium">
-          <FastForward className="w-3.5 h-3.5 text-sky-600 dark:text-cyan-400" /> Speed:
-        </span>
-        <div className="flex items-center gap-1 bg-slate-100 dark:bg-dark-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800">
+      <div className="flex items-center gap-1.5 border-l border-r border-slate-200 dark:border-slate-800 px-3">
+        <div className="flex items-center gap-0.5 bg-slate-100 dark:bg-dark-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800">
           {[0.5, 1, 2].map((s) => (
             <button
               key={s}
               onClick={() => onSpeedChange(s)}
-              className={`px-2.5 py-0.5 rounded-lg text-xs font-mono transition-all ${
+              className={`px-2 py-0.5 rounded-lg text-xs font-mono transition-all ${
                 speed === s
                   ? 'bg-white dark:bg-cyan-500 text-sky-700 dark:text-slate-950 font-bold shadow-2xs'
                   : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'

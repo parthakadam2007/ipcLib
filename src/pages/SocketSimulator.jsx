@@ -17,10 +17,10 @@ export const SocketSimulator = () => {
   const [activeScenario, setActiveScenario] = useState('');
 
   const [clientProc, setClientProc] = useState(
-    new Process({ id: 'P_CLIENT', pid: 4120, name: 'Client Process', role: '127.0.0.1:54320', initialVars: { socketState: 'CLOSED', requestsSent: 0 } })
+    new Process({ id: 'P_CLIENT', pid: 4120, name: 'Client App', role: 'Browser / Phone App', initialVars: { status: 'Disconnected', messagesSent: 0 } })
   );
   const [serverProc, setServerProc] = useState(
-    new Process({ id: 'P_SERVER', pid: 8080, name: 'Server Daemon', role: '127.0.0.1:8080 (LISTEN)', initialVars: { socketState: 'LISTEN', clientsConnected: 0 } })
+    new Process({ id: 'P_SERVER', pid: 8080, name: 'Web Server', role: 'Host Server (Port 8080)', initialVars: { status: 'Listening for clients', clientsConnected: 0 } })
   );
 
   const modelRef = useRef(new SocketModel());
@@ -28,11 +28,11 @@ export const SocketSimulator = () => {
   const [inFlightPacket, setInFlightPacket] = useState(null);
 
   const [explanationInfo, setExplanationInfo] = useState({
-    title: 'How Network Sockets Work',
-    concept: 'Client-Server Communication & Handshake',
-    explanation: 'Sockets allow processes on the same computer or across the internet to communicate. Over TCP, communication starts with the 3-Way Handshake (SYN -> SYN-ACK -> ACK) before sending data.',
-    syscall: 'socket(AF_INET, SOCK_STREAM, 0); connect(sockfd, &serv_addr, len);',
-    kernelAction: 'Client allocates ephemeral port and sends TCP SYN segment with initial sequence number'
+    title: 'Connecting Over the Network',
+    concept: 'Client & Server Communication',
+    explanation: 'Sockets connect two programs like a phone call. First they perform a quick 3-step handshake to make sure both sides are ready before exchanging messages.',
+    syscall: 'connect() / accept()',
+    kernelAction: 'Opening communication channel'
   });
 
   const handleAutoStep = useCallback((stepNumber, logger) => {
@@ -76,25 +76,25 @@ export const SocketSimulator = () => {
     if (!res.success) {
       setClientProc((prev) => {
         const clone = prev.clone();
-        clone.transitionTo(PROCESS_STATES.BLOCKED, 'connect() FAILED', res.error);
-        clone.setVariable('socketState', 'ECONNREFUSED');
+        clone.transitionTo(PROCESS_STATES.BLOCKED, 'Connection Failed', 'Server is turned off');
+        clone.setVariable('status', 'Offline');
         return clone;
       });
 
       activeLogger.log({
         step: stepNum,
         process: 'Client',
-        operation: 'connect() FAILED',
-        details: res.error,
+        operation: 'Connect Failed',
+        details: 'Server is offline. Turn the server Online to connect.',
         status: 'error'
       });
 
       setExplanationInfo({
-        title: 'Connection Refused: ECONNREFUSED',
-        concept: 'Server Port Unreachable',
-        explanation: 'The client sent a SYN packet to port 8080, but the server is offline or no process is listening on the requested port.',
-        syscall: 'connect() -> -1 (ECONNREFUSED)',
-        kernelAction: 'Kernel received TCP RST (Reset) from target or timeout occurred'
+        title: 'Connection Failed',
+        concept: 'Server is Offline',
+        explanation: 'The client tried to connect, but the server is currently turned off or unreachable. Turn the server online to connect successfully.',
+        syscall: 'connect() -> Server Offline',
+        kernelAction: 'Target server is unreachable'
       });
       return;
     }
@@ -102,26 +102,26 @@ export const SocketSimulator = () => {
     setInFlightPacket(res.packet);
     setClientProc((prev) => {
       const clone = prev.clone();
-      clone.transitionTo(PROCESS_STATES.RUNNING, 'Sent TCP SYN (Seq: 100)');
-      clone.setVariable('socketState', 'SYN_SENT');
+      clone.transitionTo(PROCESS_STATES.RUNNING, 'Sent: "Hello, can we connect?"');
+      clone.setVariable('status', 'Requesting connection...');
       return clone;
     });
 
     activeLogger.log({
       step: stepNum,
       process: 'Client',
-      operation: 'TCP SYN Transmitted',
-      details: 'Client dispatched SYN segment (seq=100) to 127.0.0.1:8080 to initiate session.',
+      operation: 'Step 1: Sent Hello',
+      details: 'Client asked the server: "Hello, can we connect?"',
       data: res.packet,
       status: 'success'
     });
 
     setExplanationInfo({
-      title: 'Step 1 of 3-Way Handshake: SYN',
-      concept: 'TCP Session Initiation',
-      explanation: 'Client sends SYN packet with sequence number 100. Socket state moves to SYN_SENT.',
-      syscall: 'connect(sockfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr))',
-      kernelAction: 'TCP stack generates SYN segment and sets retransmission timer'
+      title: 'Step 1: Client Says Hello',
+      concept: 'Starting a Connection',
+      explanation: 'The client sends a quick "Hello, can we connect?" request to the server.',
+      syscall: 'connect()',
+      kernelAction: 'Sent connection request'
     });
   };
 
@@ -447,7 +447,7 @@ export const SocketSimulator = () => {
           </div>
 
           <CommunicationChannel
-            title="TCP / IP Loopback Network Channel"
+            title="Socket Stream"
             channelType="socket"
             capacity={1}
             currentCount={socketSnapshot.connectionState === SOCKET_STATES.ESTABLISHED ? 1 : 0}
@@ -455,7 +455,7 @@ export const SocketSimulator = () => {
             customChildren={
               <div className="w-full flex items-center justify-around py-3 font-mono text-xs">
                 <div className="text-center">
-                  <span className="text-[10px] text-slate-400 block font-sans">CLIENT SOCKET</span>
+                  <span className="text-[10px] text-slate-400 block font-sans">Client</span>
                   <span className="text-sky-700 dark:text-cyan-400 font-bold">{socketSnapshot.client.state}</span>
                 </div>
                 <div className="flex items-center gap-2 text-slate-400">
@@ -466,7 +466,7 @@ export const SocketSimulator = () => {
                   <div className="w-12 h-0.5 bg-slate-300 dark:bg-slate-700" />
                 </div>
                 <div className="text-center">
-                  <span className="text-[10px] text-slate-400 block font-sans">SERVER SOCKET</span>
+                  <span className="text-[10px] text-slate-400 block font-sans">Server</span>
                   <span className="text-emerald-700 dark:text-emerald-400 font-bold">{socketSnapshot.server.state}</span>
                 </div>
               </div>
@@ -484,12 +484,12 @@ export const SocketSimulator = () => {
 
         <div className="lg:col-span-4 space-y-4">
           <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-dark-900/90 shadow-sm backdrop-blur-md space-y-3.5 text-xs transition-colors">
-            <h4 className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs pb-2.5 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
-              <Network className="w-4 h-4 text-sky-600 dark:text-cyan-400" /> Request Payload
+            <h4 className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs pb-2 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
+              <Network className="w-4 h-4 text-sky-600 dark:text-cyan-400" /> Payload
             </h4>
 
             <div>
-              <label className="text-[11px] font-medium text-slate-500 dark:text-slate-400 block mb-1">HTTP / RPC Request Payload:</label>
+              <label className="text-[11px] font-medium text-slate-500 dark:text-slate-400 block mb-1">Request Message:</label>
               <input
                 type="text"
                 value={requestText}
@@ -498,14 +498,14 @@ export const SocketSimulator = () => {
               />
             </div>
 
-            <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800 space-y-1.5 text-slate-600 dark:text-slate-300">
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-1 text-slate-600 dark:text-slate-300">
               <div className="flex justify-between">
                 <span>Protocol:</span>
-                <span className="text-sky-700 dark:text-cyan-400 font-bold font-mono">AF_INET / SOCK_STREAM</span>
+                <span className="text-sky-700 dark:text-cyan-400 font-bold font-mono">TCP / IP</span>
               </div>
               <div className="flex justify-between">
-                <span>Endpoints:</span>
-                <span className="font-mono">54320 → 8080</span>
+                <span>Port:</span>
+                <span className="font-mono">8080</span>
               </div>
             </div>
           </div>
