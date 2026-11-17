@@ -26,15 +26,14 @@ export const SignalsSimulator = () => {
   const [inFlightSignal, setInFlightSignal] = useState(null);
 
   const [explanationInfo, setExplanationInfo] = useState({
-    title: 'POSIX Asynchronous Signals (Software Interrupts)',
-    concept: 'Kernel-to-Process Notification',
-    explanation: 'Signals notify a process that an event has occurred. The kernel interrupts the target process\'s normal execution flow to execute a registered signal handler or the OS default action.',
+    title: 'How POSIX Signals Work',
+    concept: 'Asynchronous Software Interrupts',
+    explanation: 'Signals are notifications sent by the OS or another program to interrupt normal execution. They don’t carry large payloads—just an integer signal number that triggers a default action or custom trap handler.',
     syscall: 'kill(pid, sig) / sigaction(sig, &act, NULL)',
     kernelAction: 'Kernel updates the target task_struct pending signal bitmask'
   });
 
   const handleAutoStep = useCallback((stepNumber, logger) => {
-    // Pick a signal that won't terminate immediately every time, or revive if terminated
     if (p2.state === PROCESS_STATES.TERMINATED) {
       handleReviveProcess();
     } else {
@@ -73,7 +72,6 @@ export const SignalsSimulator = () => {
     setInFlightSignal(res.event.signal);
     setTimeout(() => setInFlightSignal(null), 700);
 
-    // Update P1 (Sender)
     setP1((prev) => {
       const clone = prev.clone();
       clone.transitionTo(PROCESS_STATES.RUNNING, `kill(${p2.pid}, ${res.event.signal.name})`);
@@ -82,7 +80,6 @@ export const SignalsSimulator = () => {
       return clone;
     });
 
-    // Update P2 (Target)
     setP2((prev) => {
       const clone = prev.clone();
       clone.transitionTo(res.newState, res.outcome);
@@ -149,7 +146,7 @@ export const SignalsSimulator = () => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 max-w-7xl mx-auto">
       <SimulationControls
         isRunning={isRunning}
         onRun={run}
@@ -172,11 +169,11 @@ export const SignalsSimulator = () => {
               roleLabel="Sender Process (kill() dispatcher)"
               customIcon={Radio}
               extraDetails={
-                <div className="mt-3 pt-2 border-t border-slate-800">
+                <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800">
                   <button
                     onClick={() => handleDispatchSignal(selectedSignalKey)}
                     disabled={isRunning}
-                    className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs font-mono transition-all shadow-md glow-cyan disabled:opacity-50"
+                    className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs transition-all shadow-md shadow-sky-600/20 disabled:opacity-50"
                   >
                     <Zap className="w-3.5 h-3.5 fill-current" />
                     <span>Send {selectedSignalKey}</span>
@@ -192,10 +189,10 @@ export const SignalsSimulator = () => {
               customIcon={Cpu}
               extraDetails={
                 p2.state === PROCESS_STATES.TERMINATED ? (
-                  <div className="mt-3 pt-2 border-t border-slate-800">
+                  <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800">
                     <button
                       onClick={handleReviveProcess}
-                      className="w-full py-1.5 px-3 rounded-lg bg-emerald-500 text-slate-950 font-bold text-xs font-mono transition-colors"
+                      className="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-colors shadow-2xs"
                     >
                       Respawn Process (fork)
                     </button>
@@ -206,18 +203,18 @@ export const SignalsSimulator = () => {
           </div>
 
           {/* Signal Dispatcher Visual Banner */}
-          <div className="rounded-xl border border-slate-700/80 bg-dark-900/90 p-4 shadow-xl backdrop-blur-md">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400">
+          <div className="rounded-2xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-dark-900/90 p-4 shadow-sm backdrop-blur-md transition-colors">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 text-rose-600 dark:text-rose-400">
                   <Zap className="w-4 h-4" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-white font-mono uppercase">
-                    Software Interrupt Delivery Channel
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-tight">
+                    Software Interrupt Dispatcher
                   </h4>
-                  <span className="text-[10px] text-slate-400 font-mono">
-                    Asynchronous Kernel-Level Notification Delivery
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                    Pick a signal below to interrupt the target process
                   </span>
                 </div>
               </div>
@@ -226,32 +223,32 @@ export const SignalsSimulator = () => {
                 <motion.span
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  className="px-2.5 py-0.5 rounded-full bg-rose-500 text-slate-950 font-bold text-xs font-mono animate-bounce"
+                  className="px-3 py-1 rounded-full bg-rose-600 text-white font-bold text-xs shadow-md animate-bounce"
                 >
-                  ⚡ {inFlightSignal.name} IN FLIGHT
+                  ⚡ {inFlightSignal.name} DELIVERED
                 </motion.span>
               )}
             </div>
 
             {/* Signal Picker Palette */}
-            <div className="py-3 grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div className="py-3 grid grid-cols-2 sm:grid-cols-4 gap-2.5">
               {Object.entries(SIGNALS).map(([key, sig]) => {
                 const isSelected = selectedSignalKey === key;
                 return (
                   <button
                     key={key}
                     onClick={() => setSelectedSignalKey(key)}
-                    className={`p-2 rounded-lg border font-mono text-xs text-left transition-all ${
+                    className={`p-2.5 rounded-xl border text-xs text-left transition-all ${
                       isSelected
-                        ? 'bg-cyan-500/20 border-cyan-400 text-cyan-200 font-bold shadow-sm'
-                        : 'bg-dark-950 border-slate-800 text-slate-400 hover:border-slate-700'
+                        ? 'bg-sky-50 dark:bg-cyan-500/20 border-sky-400 dark:border-cyan-400 text-sky-900 dark:text-cyan-200 font-bold shadow-2xs'
+                        : 'bg-slate-50 dark:bg-dark-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300'
                     }`}
                   >
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span>{sig.name}</span>
-                      <span className="text-[9px] text-slate-500">#{sig.number}</span>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-bold">{sig.name}</span>
+                      <span className="text-[10px] text-slate-400 font-mono">#{sig.number}</span>
                     </div>
-                    <span className="text-[9px] block text-slate-500 mt-1 truncate">
+                    <span className="text-[10px] block text-slate-500 dark:text-slate-400 mt-1 truncate">
                       {sig.catchable ? 'Catchable' : 'Uncatchable'}
                     </span>
                   </button>
@@ -271,31 +268,31 @@ export const SignalsSimulator = () => {
 
         <div className="lg:col-span-4 space-y-4">
           {/* Signal Handler Table */}
-          <div className="p-4 rounded-xl border border-slate-700/80 bg-dark-900/90 shadow-xl backdrop-blur-md space-y-3 text-xs font-mono">
-            <h4 className="font-bold text-white uppercase tracking-wider text-xs pb-2 border-b border-slate-800 flex items-center gap-2">
-              <Settings className="w-4 h-4 text-cyan-400" /> Target Signal Table
+          <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-dark-900/90 shadow-sm backdrop-blur-md space-y-3.5 text-xs transition-colors">
+            <h4 className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs pb-2.5 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
+              <Settings className="w-4 h-4 text-sky-600 dark:text-cyan-400" /> Target Process Signal Table
             </h4>
 
-            <div className="space-y-1.5 text-slate-300">
-              <div className="flex justify-between items-center text-[11px]">
+            <div className="space-y-2 text-slate-600 dark:text-slate-300">
+              <div className="flex justify-between items-center text-xs">
                 <span>SIGINT (2):</span>
-                <span className="text-cyan-400 font-bold">sigaction(custom_handler)</span>
+                <span className="text-sky-700 dark:text-cyan-400 font-bold font-mono">Custom Trap Handler</span>
               </div>
-              <div className="flex justify-between items-center text-[11px]">
+              <div className="flex justify-between items-center text-xs">
                 <span>SIGTERM (15):</span>
-                <span className="text-slate-400">SIG_DFL (Terminate)</span>
+                <span className="text-slate-500 font-mono">Terminate (SIG_DFL)</span>
               </div>
-              <div className="flex justify-between items-center text-[11px]">
+              <div className="flex justify-between items-center text-xs">
                 <span>SIGKILL (9):</span>
-                <span className="text-rose-400 font-bold">CANNOT BE CAUGHT</span>
+                <span className="text-rose-600 dark:text-rose-400 font-bold font-mono">UNCATCHABLE</span>
               </div>
-              <div className="flex justify-between items-center text-[11px]">
+              <div className="flex justify-between items-center text-xs">
                 <span>SIGUSR1 (10):</span>
-                <span className="text-emerald-400 font-bold">User Handler</span>
+                <span className="text-emerald-700 dark:text-emerald-400 font-bold font-mono">User Callback</span>
               </div>
-              <div className="flex justify-between items-center text-[11px]">
+              <div className="flex justify-between items-center text-xs">
                 <span>SIGSTOP (19):</span>
-                <span className="text-amber-400 font-bold">CANNOT BE CAUGHT</span>
+                <span className="text-amber-700 dark:text-amber-400 font-bold font-mono">UNCATCHABLE (Freeze)</span>
               </div>
             </div>
           </div>
@@ -312,4 +309,3 @@ export const SignalsSimulator = () => {
     </div>
   );
 };
-

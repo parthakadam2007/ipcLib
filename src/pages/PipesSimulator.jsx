@@ -29,9 +29,9 @@ export const PipesSimulator = () => {
   const [inFlightPacket, setInFlightPacket] = useState(null);
 
   const [explanationInfo, setExplanationInfo] = useState({
-    title: 'Anonymous UNIX Pipes (pipe() syscall)',
+    title: 'How Anonymous Pipes Work',
     concept: 'Unidirectional Byte-Stream Channel',
-    explanation: 'An anonymous pipe is an in-memory unidirectional byte stream created by the kernel. Parent and child share file descriptors inherited through fork().',
+    explanation: 'An anonymous pipe is a memory buffer managed by the operating system kernel. A parent process creates the pipe, forks a child process, and they stream raw bytes through standard file descriptors.',
     syscall: 'int pipe(int fd[2]); // fd[0]=read, fd[1]=write',
     kernelAction: 'Kernel allocates circular memory buffer and returns descriptor pair'
   });
@@ -90,7 +90,7 @@ export const PipesSimulator = () => {
         setExplanationInfo({
           title: 'Pipe Buffer Saturation: Writer Blocked',
           concept: 'Kernel Flow Control & Backpressure',
-          explanation: 'When a process writes to a full pipe, the OS scheduler moves the process to the wait queue (TASK_INTERRUPTIBLE) until the reader frees buffer space.',
+          explanation: 'When a process writes to a full pipe, the OS scheduler moves the process to the wait queue until the reader frees buffer space.',
           syscall: 'write(fd[1], buf, len) -> blocked in sys_write',
           kernelAction: 'Kernel suspends P1 and invokes schedule() to yield CPU'
         });
@@ -230,7 +230,7 @@ export const PipesSimulator = () => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 max-w-7xl mx-auto">
       <SimulationControls
         isRunning={isRunning}
         onRun={run}
@@ -252,11 +252,11 @@ export const PipesSimulator = () => {
               isHighlighted={p1.state === PROCESS_STATES.RUNNING}
               roleLabel="Parent Process (fd[1] Writer)"
               extraDetails={
-                <div className="mt-3 pt-2 border-t border-slate-800">
+                <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800">
                   <button
                     onClick={() => handleWrite()}
                     disabled={isRunning}
-                    className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs font-mono transition-all shadow-md glow-cyan disabled:opacity-50"
+                    className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs transition-all shadow-md shadow-sky-600/20 disabled:opacity-50"
                   >
                     <Send className="w-3.5 h-3.5" />
                     <span>write(fd[1], {chunkSize}B)</span>
@@ -270,11 +270,11 @@ export const PipesSimulator = () => {
               isHighlighted={p2.state === PROCESS_STATES.RUNNING}
               roleLabel="Child Process (fd[0] Reader)"
               extraDetails={
-                <div className="mt-3 pt-2 border-t border-slate-800">
+                <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800">
                   <button
                     onClick={() => handleRead()}
                     disabled={isRunning}
-                    className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs font-mono transition-all shadow-md glow-green disabled:opacity-50"
+                    className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-all shadow-md shadow-emerald-600/20 disabled:opacity-50"
                   >
                     <ArrowDownLeft className="w-3.5 h-3.5" />
                     <span>read(fd[0], {chunkSize}B)</span>
@@ -294,17 +294,17 @@ export const PipesSimulator = () => {
             inFlightPacket={inFlightPacket}
             customChildren={
               <div className="w-full space-y-2 my-2">
-                <div className="flex items-center justify-between text-[11px] font-mono text-slate-400 px-2">
-                  <span>fd[1] Write Influx</span>
-                  <span>fd[0] Read Outflow</span>
+                <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 font-medium px-2">
+                  <span>Write Influx (fd[1])</span>
+                  <span>Read Outflow (fd[0])</span>
                 </div>
-                <div className="p-3 rounded-xl bg-dark-950 border border-slate-800 font-mono text-xs text-slate-300 min-h-[50px] flex items-center">
+                <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-slate-800 font-mono text-xs text-slate-700 dark:text-slate-300 min-h-[55px] flex items-center shadow-2xs">
                   {pipeSnapshot.buffer.length > 0 ? (
-                    <span className="text-cyan-300 font-bold tracking-widest break-all">
+                    <span className="text-sky-700 dark:text-cyan-300 font-bold tracking-widest break-all">
                       {pipeSnapshot.buffer}
                     </span>
                   ) : (
-                    <span className="text-slate-400 italic">Pipe buffer is empty [0 bytes]</span>
+                    <span className="text-slate-400 dark:text-slate-500 italic font-sans text-xs">Pipe buffer is empty [0 bytes]</span>
                   )}
                 </div>
               </div>
@@ -321,36 +321,36 @@ export const PipesSimulator = () => {
         </div>
 
         <div className="lg:col-span-4 space-y-4">
-          <div className="p-4 rounded-xl border border-slate-700/80 bg-dark-900/90 shadow-xl backdrop-blur-md space-y-3 text-xs font-mono">
-            <h4 className="font-bold text-white uppercase tracking-wider text-xs pb-2 border-b border-slate-800 flex items-center gap-2">
-              <Terminal className="w-4 h-4 text-cyan-400" /> Pipe Configuration
+          <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-dark-900/90 shadow-sm backdrop-blur-md space-y-3.5 text-xs transition-colors">
+            <h4 className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs pb-2.5 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
+              <Terminal className="w-4 h-4 text-sky-600 dark:text-cyan-400" /> Pipe Configuration
             </h4>
 
             <div>
-              <label className="text-[11px] text-slate-400 block mb-1">Writer Stream Data:</label>
+              <label className="text-[11px] font-medium text-slate-500 dark:text-slate-400 block mb-1">Writer Stream Data:</label>
               <input
                 type="text"
                 value={inputData}
                 onChange={(e) => setInputData(e.target.value)}
-                className="w-full bg-dark-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-200 focus:outline-none focus:border-cyan-400 text-xs"
+                className="w-full bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-400 text-xs transition-all"
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2.5">
               <div>
-                <label className="text-[11px] text-slate-400 block mb-1">Chunk Size (Bytes):</label>
+                <label className="text-[11px] font-medium text-slate-500 dark:text-slate-400 block mb-1">Chunk Size (Bytes):</label>
                 <input
                   type="number"
                   min="1"
                   max="32"
                   value={chunkSize}
                   onChange={(e) => setChunkSize(Number(e.target.value))}
-                  className="w-full bg-dark-950 border border-slate-700 rounded-lg px-2 py-1.5 text-slate-200 focus:outline-none focus:border-cyan-400 text-xs"
+                  className="w-full bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-400 text-xs"
                 />
               </div>
 
               <div>
-                <label className="text-[11px] text-slate-400 block mb-1">Capacity (Bytes):</label>
+                <label className="text-[11px] font-medium text-slate-500 dark:text-slate-400 block mb-1">Capacity (Bytes):</label>
                 <input
                   type="number"
                   min="8"
@@ -362,7 +362,7 @@ export const PipesSimulator = () => {
                     modelRef.current.capacity = c;
                     setPipeSnapshot(modelRef.current.getSnapshot());
                   }}
-                  className="w-full bg-dark-950 border border-slate-700 rounded-lg px-2 py-1.5 text-slate-200 focus:outline-none focus:border-cyan-400 text-xs"
+                  className="w-full bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-400 text-xs"
                 />
               </div>
             </div>
@@ -380,4 +380,3 @@ export const PipesSimulator = () => {
     </div>
   );
 };
-

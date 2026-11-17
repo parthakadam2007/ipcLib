@@ -29,9 +29,9 @@ export const NamedPipeSimulator = () => {
   const [inFlightPacket, setInFlightPacket] = useState(null);
 
   const [explanationInfo, setExplanationInfo] = useState({
-    title: 'Named Pipes (FIFOs) via mkfifo()',
+    title: 'How Named Pipes (FIFOs) Work',
     concept: 'Filesystem-Backed IPC for Unrelated Processes',
-    explanation: 'Named pipes exist as special FIFO device files in the filesystem. Any two unrelated processes with proper permissions can open the path and exchange streaming data.',
+    explanation: 'Named pipes exist as special FIFO files in the filesystem. Any two completely unrelated processes with access to the path can connect. The open() call blocks until both a reader and writer have connected.',
     syscall: 'mkfifo("/tmp/app_ipc.fifo", 0666); open(path, O_WRONLY);',
     kernelAction: 'Kernel creates special filesystem inode with S_IFIFO type'
   });
@@ -106,11 +106,11 @@ export const NamedPipeSimulator = () => {
     }
 
     setExplanationInfo({
-      title: res.channelOpen ? 'FIFO Channel Open: Both Endpoints Connected' : 'Waiting on Peer Endpoint',
+      title: res.channelOpen ? 'FIFO Channel Open: Both Connected' : 'Waiting for Peer to Open',
       concept: 'FIFO Open Synchronization',
       explanation: res.channelOpen
-        ? 'Both reader and writer are now attached. In standard blocking POSIX mode, open() blocks until both sides connect.'
-        : `Attached ${role}. In blocking mode, this process would sleep until the counterpart process opens the other end.`,
+        ? 'Both reader and writer are now attached. Data can now flow through the FIFO.'
+        : `Attached ${role}. In blocking POSIX mode, this process sleeps until the other endpoint connects.`,
       syscall: `open("${fifoPath}", ${role === 'writer' ? 'O_WRONLY' : 'O_RDONLY'})`,
       kernelAction: 'Kernel checks inode reference count and wakes sleeping waiters'
     });
@@ -219,7 +219,7 @@ export const NamedPipeSimulator = () => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 max-w-7xl mx-auto">
       <SimulationControls
         isRunning={isRunning}
         onRun={run}
@@ -242,20 +242,20 @@ export const NamedPipeSimulator = () => {
               roleLabel="Unrelated Process Alpha"
               customIcon={Cpu}
               extraDetails={
-                <div className="mt-3 pt-2 border-t border-slate-800 flex gap-2">
+                <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex gap-2">
                   {!fifoSnapshot.writerAttached ? (
                     <button
                       onClick={() => handleAttach('writer')}
                       disabled={isRunning}
-                      className="flex-1 py-1.5 px-3 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs font-mono transition-all shadow-md glow-cyan disabled:opacity-50"
+                      className="flex-1 py-2 px-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs transition-all shadow-md shadow-sky-600/20 disabled:opacity-50"
                     >
-                      open(FIFO, O_WRONLY)
+                      Connect Writer (open)
                     </button>
                   ) : (
                     <button
                       onClick={() => handleWrite()}
                       disabled={isRunning}
-                      className="flex-1 py-1.5 px-3 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs font-mono transition-all shadow-md glow-green disabled:opacity-50"
+                      className="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-all shadow-md shadow-emerald-600/20 disabled:opacity-50"
                     >
                       write(FIFO, chunk)
                     </button>
@@ -270,20 +270,20 @@ export const NamedPipeSimulator = () => {
               roleLabel="Unrelated Process Beta"
               customIcon={Cpu}
               extraDetails={
-                <div className="mt-3 pt-2 border-t border-slate-800 flex gap-2">
+                <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex gap-2">
                   {!fifoSnapshot.readerAttached ? (
                     <button
                       onClick={() => handleAttach('reader')}
                       disabled={isRunning}
-                      className="flex-1 py-1.5 px-3 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs font-mono transition-all shadow-md glow-cyan disabled:opacity-50"
+                      className="flex-1 py-2 px-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs transition-all shadow-md shadow-sky-600/20 disabled:opacity-50"
                     >
-                      open(FIFO, O_RDONLY)
+                      Connect Reader (open)
                     </button>
                   ) : (
                     <button
                       onClick={() => handleRead()}
                       disabled={isRunning}
-                      className="flex-1 py-1.5 px-3 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs font-mono transition-all shadow-md glow-green disabled:opacity-50"
+                      className="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-all shadow-md shadow-emerald-600/20 disabled:opacity-50"
                     >
                       read(FIFO, 8B)
                     </button>
@@ -300,18 +300,18 @@ export const NamedPipeSimulator = () => {
             currentCount={fifoSnapshot.bufferLength}
             inFlightPacket={inFlightPacket}
             customChildren={
-              <div className="w-full space-y-2 my-2 font-mono text-xs">
-                <div className="flex items-center justify-between px-2 text-slate-400 text-[11px]">
-                  <span>Writer: {fifoSnapshot.writerAttached ? 'Connected' : 'Detached'}</span>
-                  <span>Reader: {fifoSnapshot.readerAttached ? 'Connected' : 'Detached'}</span>
+              <div className="w-full space-y-2 my-2 font-sans text-xs">
+                <div className="flex items-center justify-between px-2 text-slate-500 dark:text-slate-400 font-medium">
+                  <span>Writer: <strong>{fifoSnapshot.writerAttached ? 'Connected' : 'Detached'}</strong></span>
+                  <span>Reader: <strong>{fifoSnapshot.readerAttached ? 'Connected' : 'Detached'}</strong></span>
                 </div>
-                <div className="p-3 rounded-xl bg-dark-950 border border-slate-800 text-slate-300 min-h-[50px] flex items-center">
+                <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 min-h-[55px] flex items-center font-mono">
                   {fifoSnapshot.buffer.length > 0 ? (
-                    <span className="text-cyan-300 font-bold tracking-widest break-all">
+                    <span className="text-sky-700 dark:text-cyan-300 font-bold tracking-widest break-all">
                       {fifoSnapshot.buffer}
                     </span>
                   ) : (
-                    <span className="text-slate-400 italic">FIFO buffer empty</span>
+                    <span className="text-slate-400 italic font-sans text-xs">FIFO buffer empty</span>
                   )}
                 </div>
               </div>
@@ -328,28 +328,28 @@ export const NamedPipeSimulator = () => {
         </div>
 
         <div className="lg:col-span-4 space-y-4">
-          <div className="p-4 rounded-xl border border-slate-700/80 bg-dark-900/90 shadow-xl backdrop-blur-md space-y-3 text-xs font-mono">
-            <h4 className="font-bold text-white uppercase tracking-wider text-xs pb-2 border-b border-slate-800 flex items-center gap-2">
-              <FolderOpen className="w-4 h-4 text-cyan-400" /> Filesystem Node Settings
+          <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-dark-900/90 shadow-sm backdrop-blur-md space-y-3.5 text-xs transition-colors">
+            <h4 className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs pb-2.5 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
+              <FolderOpen className="w-4 h-4 text-sky-600 dark:text-cyan-400" /> Filesystem Settings
             </h4>
 
             <div>
-              <label className="text-[11px] text-slate-400 block mb-1">FIFO Inode Path:</label>
+              <label className="text-[11px] font-medium text-slate-500 dark:text-slate-400 block mb-1">FIFO Inode Path:</label>
               <input
                 type="text"
                 value={fifoPath}
                 onChange={(e) => setFifoPath(e.target.value)}
-                className="w-full bg-dark-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-200 focus:outline-none focus:border-cyan-400 text-xs"
+                className="w-full bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-400 text-xs transition-all"
               />
             </div>
 
             <div>
-              <label className="text-[11px] text-slate-400 block mb-1">Payload String:</label>
+              <label className="text-[11px] font-medium text-slate-500 dark:text-slate-400 block mb-1">Payload String:</label>
               <input
                 type="text"
                 value={messageText}
                 onChange={(e) => setMessageText(e.target.value)}
-                className="w-full bg-dark-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-200 focus:outline-none focus:border-cyan-400 text-xs"
+                className="w-full bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-400 text-xs transition-all"
               />
             </div>
           </div>
@@ -366,4 +366,3 @@ export const NamedPipeSimulator = () => {
     </div>
   );
 };
-

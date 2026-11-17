@@ -19,15 +19,15 @@ export default {
           500: '#52669b',
         },
         proc: {
-          ready: '#38bdf8',
-          running: '#22c55e',
-          blocked: '#f59e0b',
-          terminated: '#ef4444',
-          waiting: '#eab308'
+          ready: '#0284c7',
+          running: '#16a34a',
+          blocked: '#d97706',
+          terminated: '#dc2626',
+          waiting: '#ca8a04'
         }
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'Consolas', 'monospace'],
       },
       animation: {
@@ -44,4 +44,3 @@ export default {
   },
   plugins: [],
 }
-

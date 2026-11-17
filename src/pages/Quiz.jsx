@@ -63,31 +63,31 @@ export const Quiz = ({ onExploreLab }) => {
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
       {/* Quiz Header */}
-      <div className="p-6 rounded-2xl bg-gradient-to-r from-dark-900 via-dark-850 to-dark-900 border border-slate-800 shadow-xl flex items-center justify-between flex-wrap gap-4">
+      <div className="p-6 rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 shadow-sm dark:shadow-xl flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
+          <div className="p-2.5 rounded-xl bg-sky-50 dark:bg-cyan-500/10 border border-sky-200 dark:border-cyan-500/30 text-sky-600 dark:text-cyan-400">
             <HelpCircle className="w-6 h-6" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-white tracking-wide">
+            <h2 className="text-xl font-bold text-slate-800 dark:text-white tracking-wide">
               IPC & Synchronization Knowledge Assessment
             </h2>
-            <p className="text-xs text-slate-400 font-mono">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-sans">
               Validate your understanding of system calls, concurrency, memory models, and deadlock
             </p>
           </div>
         </div>
 
         {/* Difficulty Filter */}
-        <div className="flex items-center gap-1.5 bg-dark-950 p-1 rounded-xl border border-slate-800 text-xs font-mono">
+        <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-dark-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-mono">
           {['all', 'beginner', 'intermediate', 'advanced'].map((lvl) => (
             <button
               key={lvl}
               onClick={() => handleRestart(lvl)}
               className={`px-3 py-1 rounded-lg capitalize transition-all ${
                 selectedDifficulty === lvl
-                  ? 'bg-cyan-500 text-slate-950 font-bold shadow-sm'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-white dark:bg-cyan-500 text-sky-700 dark:text-slate-950 font-bold shadow-sm'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               {lvl}
@@ -99,22 +99,22 @@ export const Quiz = ({ onExploreLab }) => {
       {/* Main Quiz Body */}
       {!isFinished ? (
         activeQuestion && (
-          <div className="rounded-2xl border border-slate-800 bg-dark-900/90 p-6 shadow-xl space-y-6">
+          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-dark-900/90 p-6 shadow-sm dark:shadow-xl space-y-6">
             {/* Progress bar and question metadata */}
-            <div className="flex items-center justify-between text-xs font-mono text-slate-400 pb-3 border-b border-slate-800">
+            <div className="flex items-center justify-between text-xs font-mono text-slate-500 dark:text-slate-400 pb-3 border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 uppercase font-bold text-[10px]">
+                <span className="px-2 py-0.5 rounded bg-sky-50 dark:bg-cyan-500/10 text-sky-700 dark:text-cyan-400 border border-sky-200 dark:border-cyan-500/30 uppercase font-bold text-[10px]">
                   {activeQuestion.difficulty}
                 </span>
-                <span className="text-slate-300">Category: {activeQuestion.category}</span>
+                <span className="text-slate-600 dark:text-slate-300 font-sans">Category: {activeQuestion.category}</span>
               </div>
-              <div className="font-bold text-slate-200">
+              <div className="font-bold text-slate-700 dark:text-slate-200">
                 Question {currentIdx + 1} of {filteredQuestions.length}
               </div>
             </div>
 
             {/* Question Text */}
-            <h3 className="text-lg font-bold text-white leading-relaxed font-sans">
+            <h3 className="text-lg font-bold text-slate-800 dark:text-white leading-relaxed font-sans">
               {activeQuestion.question}
             </h3>
 
@@ -124,15 +124,15 @@ export const Quiz = ({ onExploreLab }) => {
                 const isSelected = selectedOption === idx;
                 const isCorrect = idx === activeQuestion.answer;
 
-                let btnStyle = 'bg-dark-950/80 border-slate-800 text-slate-200 hover:border-slate-700';
+                let btnStyle = 'bg-slate-50 dark:bg-dark-950/80 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:border-sky-300 dark:hover:border-slate-700 hover:bg-sky-50/40';
 
                 if (isAnswered) {
                   if (isCorrect) {
-                    btnStyle = 'bg-emerald-950/40 border-emerald-500 text-emerald-200 font-bold';
+                    btnStyle = 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 text-emerald-800 dark:text-emerald-200 font-bold';
                   } else if (isSelected) {
-                    btnStyle = 'bg-rose-950/40 border-rose-500 text-rose-200 font-bold';
+                    btnStyle = 'bg-rose-50 dark:bg-rose-950/40 border-rose-500 text-rose-800 dark:text-rose-200 font-bold';
                   } else {
-                    btnStyle = 'bg-dark-950/40 border-slate-900 text-slate-500 opacity-60';
+                    btnStyle = 'bg-slate-50/50 dark:bg-dark-950/40 border-slate-100 dark:border-slate-900 text-slate-400 dark:text-slate-500 opacity-60';
                   }
                 }
 
@@ -144,17 +144,17 @@ export const Quiz = ({ onExploreLab }) => {
                     className={`w-full text-left p-4 rounded-xl border text-sm font-sans flex items-center justify-between transition-all ${btnStyle}`}
                   >
                     <div className="flex items-center gap-3">
-                      <span className="w-6 h-6 rounded-lg bg-dark-900 border border-slate-700 text-xs font-mono font-bold flex items-center justify-center shrink-0">
+                      <span className="w-6 h-6 rounded-lg bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-700 text-xs font-mono font-bold flex items-center justify-center shrink-0 text-slate-600 dark:text-slate-300">
                         {String.fromCharCode(65 + idx)}
                       </span>
                       <span>{opt}</span>
                     </div>
 
                     {isAnswered && isCorrect && (
-                      <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                      <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                     )}
                     {isAnswered && isSelected && !isCorrect && (
-                      <XCircle className="w-5 h-5 text-rose-400 shrink-0" />
+                      <XCircle className="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0" />
                     )}
                   </button>
                 );
@@ -163,9 +163,9 @@ export const Quiz = ({ onExploreLab }) => {
 
             {/* Explanation card upon answering */}
             {isAnswered && (
-              <div className="p-4 rounded-xl bg-cyan-950/30 border border-cyan-800/40 text-xs font-mono space-y-1">
-                <span className="font-bold text-cyan-300 block">Explanation:</span>
-                <p className="text-slate-300 leading-relaxed font-sans text-xs">
+              <div className="p-4 rounded-xl bg-sky-50 dark:bg-cyan-950/30 border border-sky-200 dark:border-cyan-800/40 text-xs space-y-1">
+                <span className="font-bold text-sky-800 dark:text-cyan-300 block">Explanation:</span>
+                <p className="text-slate-700 dark:text-slate-300 leading-relaxed font-sans text-xs">
                   {activeQuestion.explanation}
                 </p>
               </div>
@@ -176,7 +176,7 @@ export const Quiz = ({ onExploreLab }) => {
               <div className="flex justify-end pt-2">
                 <button
                   onClick={handleNext}
-                  className="px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs font-mono transition-all shadow-md glow-cyan flex items-center gap-2"
+                  className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 dark:bg-cyan-500 dark:hover:bg-cyan-400 text-white dark:text-slate-950 font-bold text-xs font-mono transition-all shadow-md flex items-center gap-2"
                 >
                   <span>{currentIdx + 1 === filteredQuestions.length ? 'View Final Results' : 'Next Question'}</span>
                   <ArrowRight className="w-4 h-4" />
@@ -187,25 +187,25 @@ export const Quiz = ({ onExploreLab }) => {
         )
       ) : (
         /* Results Card */
-        <div className="rounded-2xl border border-slate-800 bg-dark-900/90 p-8 shadow-2xl text-center space-y-6">
-          <div className="w-16 h-16 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 flex items-center justify-center mx-auto shadow-lg glow-cyan">
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-dark-900/90 p-8 shadow-sm dark:shadow-2xl text-center space-y-6">
+          <div className="w-16 h-16 rounded-2xl bg-sky-50 dark:bg-cyan-500/10 border border-sky-200 dark:border-cyan-500/30 text-sky-600 dark:text-cyan-400 flex items-center justify-center mx-auto shadow-sm">
             <Award className="w-8 h-8" />
           </div>
 
           <div>
-            <h3 className="text-2xl font-bold text-white tracking-wide">
+            <h3 className="text-2xl font-bold text-slate-800 dark:text-white tracking-wide">
               Assessment Completed!
             </h3>
-            <p className="text-xs text-slate-400 font-mono mt-1">
-              Level: <span className="uppercase text-cyan-300 font-bold">{selectedDifficulty}</span>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-sans mt-1">
+              Level: <span className="uppercase text-sky-700 dark:text-cyan-300 font-bold">{selectedDifficulty}</span>
             </p>
           </div>
 
-          <div className="p-6 rounded-2xl bg-dark-950 border border-slate-800 max-w-sm mx-auto font-mono">
-            <div className="text-4xl font-black text-cyan-400 mb-1">
+          <div className="p-6 rounded-2xl bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-slate-800 max-w-sm mx-auto font-mono">
+            <div className="text-4xl font-black text-sky-600 dark:text-cyan-400 mb-1">
               {score} / {filteredQuestions.length}
             </div>
-            <div className="text-xs text-slate-400">
+            <div className="text-xs text-slate-500 dark:text-slate-400">
               Score: {Math.round((score / filteredQuestions.length) * 100)}%
             </div>
           </div>
@@ -213,7 +213,7 @@ export const Quiz = ({ onExploreLab }) => {
           <div className="flex items-center justify-center gap-3 pt-2">
             <button
               onClick={() => handleRestart(selectedDifficulty)}
-              className="px-4 py-2 rounded-xl bg-dark-850 hover:bg-dark-800 text-slate-200 border border-slate-700 text-xs font-mono font-bold flex items-center gap-2 transition-colors"
+              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-dark-850 dark:hover:bg-dark-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-mono font-bold flex items-center gap-2 transition-colors"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Retry Quiz</span>
@@ -222,7 +222,7 @@ export const Quiz = ({ onExploreLab }) => {
             {onExploreLab && (
               <button
                 onClick={onExploreLab}
-                className="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-mono font-bold shadow-md glow-cyan transition-all"
+                className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 dark:bg-cyan-500 dark:hover:bg-cyan-400 text-white dark:text-slate-950 text-xs font-mono font-bold shadow-md transition-all"
               >
                 Return to Simulator Lab
               </button>

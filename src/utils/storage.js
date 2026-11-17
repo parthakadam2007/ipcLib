@@ -10,9 +10,9 @@ const STORAGE_KEYS = {
 export const getPreferences = () => {
   try {
     const data = localStorage.getItem(STORAGE_KEYS.PREFERENCES);
-    return data ? JSON.parse(data) : { theme: 'dark', speed: 1, sound: false };
+    return data ? JSON.parse(data) : { theme: 'light', speed: 1, sound: false };
   } catch (e) {
-    return { theme: 'dark', speed: 1, sound: false };
+    return { theme: 'light', speed: 1, sound: false };
   }
 };
 

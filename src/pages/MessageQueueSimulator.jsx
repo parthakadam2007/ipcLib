@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, Send, ArrowDownLeft, ShieldAlert, Cpu, Sparkles, Filter, Plus } from 'lucide-react';
+import { MessageSquare, Send, ArrowDownLeft, ShieldAlert, Cpu, Sparkles, Filter, Plus, ArrowRight } from 'lucide-react';
 import { Process, PROCESS_STATES } from '../engine/processManager';
 import { MessageQueueModel } from '../ipc/messageQueueModel';
 import { useSimulation } from '../hooks/useSimulation';
@@ -34,22 +34,19 @@ export const MessageQueueSimulator = () => {
   const [queueSnapshot, setQueueSnapshot] = useState(modelRef.current.getSnapshot());
   const [inFlightPacket, setInFlightPacket] = useState(null);
   const [explanationInfo, setExplanationInfo] = useState({
-    title: 'POSIX Message Queues (mq_send / mq_receive)',
+    title: 'How Message Queues Work',
     concept: 'Discrete Prioritized Message Passing',
-    explanation: 'Message queues store distinct packets of data in kernel memory with strict boundaries and integer priorities. Ready to execute steps.',
+    explanation: 'Unlike continuous byte streams (like pipes), message queues store distinct packets with explicit message boundaries and priority levels. The kernel coordinates senders and receivers automatically.',
     syscall: 'mq_open("/lab_mq", O_CREAT | O_RDWR)',
     kernelAction: 'Kernel initializes priority linked list and allocates descriptor'
   });
 
   // Automated step logic for continuous execution
   const handleAutoStep = useCallback((stepNumber, logger) => {
-    // Alternate or pick an action: if queue is empty, send; if queue has items, randomly send or receive
     const mq = modelRef.current;
     if (mq.isEmpty() || Math.random() > 0.45) {
-      // Send a message
       handleSendMessage(logger, stepNumber);
     } else {
-      // Receive a message
       handleReceiveMessage(logger, stepNumber);
     }
   }, []);
@@ -89,7 +86,6 @@ export const MessageQueueSimulator = () => {
 
     if (!res.success) {
       if (res.blocked) {
-        // P1 becomes blocked
         setP1((prev) => {
           const clone = prev.clone();
           clone.transitionTo(PROCESS_STATES.BLOCKED, 'mq_send() blocked: Queue Full', 'Queue capacity reached (5/5)');
@@ -113,7 +109,6 @@ export const MessageQueueSimulator = () => {
           kernelAction: 'Process P1 task_struct marked TASK_INTERRUPTIBLE and placed on wait_queue_head'
         });
       } else {
-        // Non-blocking EAGAIN
         activeLogger.log({
           step: stepNum,
           process: 'P1',
@@ -200,7 +195,6 @@ export const MessageQueueSimulator = () => {
     }
 
     // Success
-    // If P1 was previously blocked on full, unblock it
     setP1((prev) => {
       if (prev.state === PROCESS_STATES.BLOCKED) {
         const clone = prev.clone();
@@ -265,7 +259,6 @@ export const MessageQueueSimulator = () => {
     }
 
     if (sc.id === 'mq-priority') {
-      // Preload high and low priority items
       modelRef.current.enqueue({ content: 'Telemetry Ping', priority: 1, sender: 'P1' });
       modelRef.current.enqueue({ content: 'Periodic Log', priority: 2, sender: 'P1' });
       modelRef.current.enqueue({ content: 'CRITICAL SHUTDOWN ALERT', priority: 5, sender: 'P1' });
@@ -295,7 +288,7 @@ export const MessageQueueSimulator = () => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 max-w-7xl mx-auto">
       {/* Simulation Controls Bar */}
       <SimulationControls
         isRunning={isRunning}
@@ -309,13 +302,13 @@ export const MessageQueueSimulator = () => {
         activeScenarioId={activeScenario}
         onSelectScenario={handleSelectScenario}
         customControls={
-          <div className="flex items-center gap-2 text-xs font-mono">
-            <span className="text-slate-400">Mode:</span>
+          <div className="flex items-center gap-2 text-xs">
+            <span className="text-slate-500 dark:text-slate-400 font-medium">Ordering:</span>
             <button
               onClick={() => handleModeChange(mode === 'FIFO' ? 'PRIORITY' : 'FIFO')}
-              className="px-2 py-1 rounded bg-dark-950 border border-slate-700 text-cyan-300 hover:border-cyan-400 font-semibold"
+              className="px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-dark-950 border border-slate-200 dark:border-slate-700 text-sky-700 dark:text-cyan-300 font-bold transition-colors shadow-2xs"
             >
-              {mode}
+              {mode === 'FIFO' ? 'FIFO (First-In First-Out)' : 'PRIORITY (Urgent First)'}
             </button>
           </div>
         }
@@ -332,11 +325,11 @@ export const MessageQueueSimulator = () => {
               isHighlighted={p1.state === PROCESS_STATES.RUNNING}
               roleLabel="Sender Process (mq_send)"
               extraDetails={
-                <div className="mt-3 pt-2 border-t border-slate-800 flex gap-2">
+                <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex gap-2">
                   <button
                     onClick={() => handleSendMessage()}
                     disabled={isRunning}
-                    className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs font-mono transition-all shadow-md glow-cyan disabled:opacity-50"
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs transition-all shadow-md shadow-sky-600/20 disabled:opacity-50"
                   >
                     <Send className="w-3.5 h-3.5" />
                     <span>Send Message</span>
@@ -350,11 +343,11 @@ export const MessageQueueSimulator = () => {
               isHighlighted={p2.state === PROCESS_STATES.RUNNING}
               roleLabel="Receiver Process (mq_receive)"
               extraDetails={
-                <div className="mt-3 pt-2 border-t border-slate-800 flex gap-2">
+                <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex gap-2">
                   <button
                     onClick={() => handleReceiveMessage()}
                     disabled={isRunning}
-                    className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs font-mono transition-all shadow-md glow-green disabled:opacity-50"
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-all shadow-md shadow-emerald-600/20 disabled:opacity-50"
                   >
                     <ArrowDownLeft className="w-3.5 h-3.5" />
                     <span>Receive Message</span>
@@ -375,14 +368,14 @@ export const MessageQueueSimulator = () => {
             inFlightPacket={inFlightPacket}
             customChildren={
               <div className="w-full space-y-2 my-2">
-                <div className="flex items-center justify-between text-xs font-mono px-2 text-slate-400">
-                  <span>Queue Head (Next out)</span>
-                  <span>Queue Tail (Recent in)</span>
+                <div className="flex items-center justify-between text-xs px-2 text-slate-500 dark:text-slate-400 font-medium">
+                  <span>Front (Next to Dequeue)</span>
+                  <span>Back (Recently Added)</span>
                 </div>
-                <div className="flex items-center gap-2 overflow-x-auto p-2 bg-dark-950/70 rounded-xl border border-slate-800/80 min-h-[70px]">
+                <div className="flex items-center gap-2.5 overflow-x-auto p-3 bg-slate-50 dark:bg-dark-950/70 rounded-2xl border border-slate-200 dark:border-slate-800/80 min-h-[80px]">
                   {queueSnapshot.items.length === 0 ? (
-                    <div className="w-full text-center text-xs font-mono text-slate-400 py-3">
-                      Queue is empty. Call mq_send() to enqueue messages.
+                    <div className="w-full text-center text-xs text-slate-400 py-3 font-sans">
+                      Queue is currently empty. Click "Send Message" above to enqueue a packet.
                     </div>
                   ) : (
                     queueSnapshot.items.map((msg, idx) => (
@@ -392,32 +385,32 @@ export const MessageQueueSimulator = () => {
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         exit={{ scale: 0.8, opacity: 0 }}
-                        className={`shrink-0 p-2.5 rounded-lg border font-mono text-xs flex flex-col justify-between shadow-md min-w-[130px] ${
+                        className={`shrink-0 p-3 rounded-xl border text-xs flex flex-col justify-between shadow-2xs min-w-[145px] transition-all ${
                           msg.priority >= 4
-                            ? 'bg-rose-950/30 border-rose-500/50 text-rose-200'
+                            ? 'bg-rose-50 border-rose-200 text-rose-900 dark:bg-rose-950/30 dark:border-rose-500/50 dark:text-rose-200'
                             : msg.priority === 3
-                            ? 'bg-amber-950/30 border-amber-500/50 text-amber-200'
-                            : 'bg-cyan-950/30 border-cyan-500/50 text-cyan-200'
+                            ? 'bg-amber-50 border-amber-200 text-amber-900 dark:bg-amber-950/30 dark:border-amber-500/50 dark:text-amber-200'
+                            : 'bg-sky-50 border-sky-200 text-sky-900 dark:bg-cyan-950/30 dark:border-cyan-500/50 dark:text-cyan-200'
                         }`}
                       >
                         <div className="flex items-center justify-between gap-1 mb-1">
-                          <span className="text-[10px] font-bold text-slate-300 font-mono">
+                          <span className="text-[10px] font-bold font-mono text-slate-500 dark:text-slate-400">
                             #{idx + 1} [{msg.id}]
                           </span>
                           <span
-                            className={`px-1.5 py-0.2 rounded text-[9px] font-bold ${
+                            className={`px-1.5 py-0.2 rounded-full text-[9px] font-bold ${
                               msg.priority >= 4
-                                ? 'bg-rose-500/30 text-rose-300'
-                                : 'bg-cyan-500/30 text-cyan-300'
+                                ? 'bg-rose-100 text-rose-800 dark:bg-rose-500/30 dark:text-rose-300'
+                                : 'bg-sky-100 text-sky-800 dark:bg-cyan-500/30 dark:text-cyan-300'
                             }`}
                           >
                             Prio {msg.priority}
                           </span>
                         </div>
-                        <div className="font-semibold truncate text-[11px] text-white">
+                        <div className="font-bold text-xs truncate text-slate-900 dark:text-white">
                           {msg.content}
                         </div>
-                        <div className="text-[9px] text-slate-400 mt-1 flex justify-between">
+                        <div className="text-[10px] text-slate-400 mt-1.5 flex justify-between">
                           <span>from {msg.sender}</span>
                           <span>{msg.createdAt}</span>
                         </div>
@@ -442,62 +435,62 @@ export const MessageQueueSimulator = () => {
         {/* Right Column: Configuration & Event Timeline */}
         <div className="lg:col-span-4 space-y-4">
           {/* Message Composition & Queue Configuration Card */}
-          <div className="p-4 rounded-xl border border-slate-700/80 bg-dark-900/90 shadow-xl backdrop-blur-md space-y-3 text-xs font-mono">
-            <h4 className="font-bold text-white uppercase tracking-wider text-xs flex items-center gap-1.5 pb-2 border-b border-slate-800">
-              <Plus className="w-4 h-4 text-cyan-400" /> Compose Message
+          <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-dark-900/90 shadow-sm backdrop-blur-md space-y-3.5 text-xs transition-colors">
+            <h4 className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs flex items-center gap-1.5 pb-2.5 border-b border-slate-100 dark:border-slate-800">
+              <Plus className="w-4 h-4 text-sky-600 dark:text-cyan-400" /> Compose Message
             </h4>
 
             <div>
-              <label className="text-[11px] text-slate-400 block mb-1">Message Content:</label>
+              <label className="text-[11px] font-medium text-slate-500 dark:text-slate-400 block mb-1">Message Content:</label>
               <input
                 type="text"
                 value={customMsgText}
                 onChange={(e) => setCustomMsgText(e.target.value)}
-                className="w-full bg-dark-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-200 focus:outline-none focus:border-cyan-400 text-xs"
+                className="w-full bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-400 text-xs transition-all"
                 placeholder="Enter payload string..."
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2.5">
               <div>
-                <label className="text-[11px] text-slate-400 block mb-1">Priority (1-5):</label>
+                <label className="text-[11px] font-medium text-slate-500 dark:text-slate-400 block mb-1">Priority (1-5):</label>
                 <select
                   value={customPriority}
                   onChange={(e) => setCustomPriority(Number(e.target.value))}
-                  className="w-full bg-dark-950 border border-slate-700 rounded-lg px-2 py-1.5 text-slate-200 focus:outline-none focus:border-cyan-400 text-xs"
+                  className="w-full bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-400 text-xs cursor-pointer"
                 >
-                  <option value={1}>1 (Lowest / Routine)</option>
+                  <option value={1}>1 (Lowest)</option>
                   <option value={2}>2 (Low)</option>
                   <option value={3}>3 (Normal)</option>
                   <option value={4}>4 (High)</option>
-                  <option value={5}>5 (Critical / Alert)</option>
+                  <option value={5}>5 (Critical)</option>
                 </select>
               </div>
 
               <div>
-                <label className="text-[11px] text-slate-400 block mb-1">Queue Capacity:</label>
+                <label className="text-[11px] font-medium text-slate-500 dark:text-slate-400 block mb-1">Queue Capacity:</label>
                 <input
                   type="number"
                   min="1"
                   max="10"
                   value={capacity}
                   onChange={(e) => handleCapacityChange(e.target.value)}
-                  className="w-full bg-dark-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-200 focus:outline-none focus:border-cyan-400 text-xs"
+                  className="w-full bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-400 text-xs"
                 />
               </div>
             </div>
 
-            <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-[11px]">
-              <span className="text-slate-400">Non-blocking (O_NONBLOCK):</span>
+            <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
+              <span className="text-slate-600 dark:text-slate-400 font-medium">Non-blocking Mode:</span>
               <button
                 onClick={() => setIsNonBlocking(!isNonBlocking)}
-                className={`px-2 py-0.5 rounded text-[10px] font-bold border transition-colors ${
+                className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-colors ${
                   isNonBlocking
-                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                    : 'bg-dark-950 text-slate-400 border-slate-700'
+                    ? 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/40'
+                    : 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-dark-950 dark:text-slate-400 dark:border-slate-700'
                 }`}
               >
-                {isNonBlocking ? 'ENABLED (IPC_NOWAIT)' : 'DISABLED (Blocking)'}
+                {isNonBlocking ? 'ENABLED (IPC_NOWAIT)' : 'DISABLED (Wait/Block)'}
               </button>
             </div>
           </div>
@@ -515,4 +508,3 @@ export const MessageQueueSimulator = () => {
     </div>
   );
 };
-

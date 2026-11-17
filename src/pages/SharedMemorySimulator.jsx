@@ -26,16 +26,15 @@ export const SharedMemorySimulator = () => {
   const [raceConditionDetail, setRaceConditionDetail] = useState(null);
 
   const [explanationInfo, setExplanationInfo] = useState({
-    title: 'Shared Memory & Virtual Memory Mapping',
+    title: 'How Shared Memory & Mutexes Work',
     concept: 'Direct Physical RAM Sharing',
-    explanation: 'Shared memory maps the exact same physical memory frames into multiple processes. Reads and writes happen at hardware memory bus speeds with zero kernel copying.',
+    explanation: 'Shared memory maps the exact same physical RAM pages into multiple processes. Reading and writing happen at hardware memory speeds. However, without a mutex lock, concurrent writes overwrite each other (lost updates).',
     syscall: 'shmat(shmid, NULL, 0) / mmap(NULL, len, PROT_READ|PROT_WRITE, MAP_SHARED)',
     kernelAction: 'Page tables of both processes updated to point to the identical physical RAM page'
   });
 
   // Automated step: simulate concurrent increments
   const handleAutoStep = useCallback((stepNumber, logger) => {
-    // Pick P1 or P2 to increment
     const activeProc = Math.random() > 0.5 ? 'P1' : 'P2';
     handleIncrementCounter(activeProc, logger, stepNumber);
   }, [synchronized]);
@@ -59,18 +58,13 @@ export const SharedMemorySimulator = () => {
     initialSpeed: 1
   });
 
-  // Increment counter logic:
-  // With sync: acquire mutex -> read -> increment -> write -> release mutex
-  // Without sync: both read same value -> both write same increment => LOST UPDATE!
   const handleIncrementCounter = (procId, activeLogger = logger, stepNum = stepCount + 1) => {
     const shm = modelRef.current;
     const currentVal = shm.read('counter');
 
     if (synchronized) {
-      // Synchronized path with Mutex
       const lockRes = shm.acquireMutex(procId);
       if (!lockRes.success) {
-        // Mutex is locked by someone else
         const targetProc = procId === 'P1' ? setP1 : setP2;
         targetProc((prev) => {
           const clone = prev.clone();
@@ -90,7 +84,6 @@ export const SharedMemorySimulator = () => {
         return;
       }
 
-      // Lock acquired! Critical section
       const newVal = currentVal + 1;
       shm.write('counter', newVal, procId, true);
       shm.releaseMutex(procId);
@@ -104,7 +97,6 @@ export const SharedMemorySimulator = () => {
         return clone;
       });
 
-      // Unblock other process if it was waiting
       setP1((prev) => (prev.state === PROCESS_STATES.BLOCKED ? prev.clone() : prev));
       setP2((prev) => (prev.state === PROCESS_STATES.BLOCKED ? prev.clone() : prev));
 
@@ -114,7 +106,7 @@ export const SharedMemorySimulator = () => {
       activeLogger.log({
         step: stepNum,
         process: procId,
-        operation: 'Atomic Increment (Synchronized)',
+        operation: 'Atomic Increment (Safe)',
         details: `${procId} acquired mutex, safely incremented counter from ${currentVal} to ${newVal}, and released mutex.`,
         data: { oldValue: currentVal, newValue: newVal, lock: 'MUTEX_OK' },
         status: 'success'
@@ -123,17 +115,15 @@ export const SharedMemorySimulator = () => {
       setExplanationInfo({
         title: 'Critical Section Executed Safely with Mutex',
         concept: 'Mutual Exclusion (pthread_mutex)',
-        explanation: `Process ${procId} held the mutex lock while updating the memory word. Mutual exclusion was preserved, guaranteeing atomic serialization.`,
+        explanation: `Process ${procId} locked the mutex before updating memory. The other process had to wait, guaranteeing no lost updates.`,
         syscall: 'pthread_mutex_lock() -> write -> pthread_mutex_unlock()',
         kernelAction: 'Atomic test-and-set instruction succeeded; no interference'
       });
     } else {
-      // Unsynchronized path: simulate concurrent interleaving race condition
       const isRace = Math.random() > 0.4;
       const newVal = currentVal + 1;
 
       if (isRace) {
-        // Race condition: P1 and P2 read the same value, both write 11 -> one update LOST!
         shm.write('counter', newVal, procId, false);
         shm.raceConditionDetected = true;
 
@@ -167,7 +157,7 @@ export const SharedMemorySimulator = () => {
         setExplanationInfo({
           title: 'Race Condition Occurred: Lost Update',
           concept: 'Lack of Mutual Exclusion',
-          explanation: `Without synchronization locks, the read-modify-write cycle (1. Load from RAM, 2. Add 1 in CPU register, 3. Store back) was interleaved between processes. The second write wiped out the first!`,
+          explanation: `Without synchronization locks, the read-modify-write cycle was interleaved between processes. Both read the same original number, and one update wiped out the other.`,
           syscall: 'Direct RAM pointer write (Unsynchronized *ptr = val)',
           kernelAction: 'Hardware memory controller committed write without synchronization barrier'
         });
@@ -223,7 +213,7 @@ export const SharedMemorySimulator = () => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 max-w-7xl mx-auto">
       <SimulationControls
         isRunning={isRunning}
         onRun={run}
@@ -234,7 +224,7 @@ export const SharedMemorySimulator = () => {
         onSpeedChange={setSpeed}
         syncEnabled={synchronized}
         onToggleSync={setSynchronized}
-        syncLabel="Mutex Locking"
+        syncLabel="Mutex Lock Protection"
         scenarios={SCENARIOS.sharedMemory}
         activeScenarioId={activeScenario}
         onSelectScenario={handleSelectScenario}
@@ -246,13 +236,13 @@ export const SharedMemorySimulator = () => {
             <ProcessNode
               process={p1}
               isHighlighted={p1.state === PROCESS_STATES.RUNNING}
-              roleLabel="Process 1 (shm access)"
+              roleLabel="Process 1 (Accessing RAM)"
               extraDetails={
-                <div className="mt-3 pt-2 border-t border-slate-800">
+                <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800">
                   <button
                     onClick={() => handleIncrementCounter('P1')}
                     disabled={isRunning}
-                    className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs font-mono transition-all shadow-md glow-cyan disabled:opacity-50"
+                    className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs transition-all shadow-md shadow-sky-600/20 disabled:opacity-50"
                   >
                     <RefreshCw className="w-3.5 h-3.5" />
                     <span>P1: counter++</span>
@@ -264,13 +254,13 @@ export const SharedMemorySimulator = () => {
             <ProcessNode
               process={p2}
               isHighlighted={p2.state === PROCESS_STATES.RUNNING}
-              roleLabel="Process 2 (shm access)"
+              roleLabel="Process 2 (Accessing RAM)"
               extraDetails={
-                <div className="mt-3 pt-2 border-t border-slate-800">
+                <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800">
                   <button
                     onClick={() => handleIncrementCounter('P2')}
                     disabled={isRunning}
-                    className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs font-mono transition-all shadow-md glow-green disabled:opacity-50"
+                    className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-all shadow-md shadow-emerald-600/20 disabled:opacity-50"
                   >
                     <RefreshCw className="w-3.5 h-3.5" />
                     <span>P2: counter++</span>
@@ -281,31 +271,31 @@ export const SharedMemorySimulator = () => {
           </div>
 
           {/* Shared Memory Segment Visual Representation */}
-          <div className="rounded-xl border border-slate-700/80 bg-dark-900/90 p-4 shadow-xl backdrop-blur-md">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-purple-500/10 border border-purple-500/30 text-purple-400">
+          <div className="rounded-2xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-dark-900/90 p-4 shadow-sm backdrop-blur-md transition-colors">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/30 text-purple-600 dark:text-purple-400">
                   <HardDrive className="w-4 h-4" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-white font-mono uppercase">
-                    Shared Physical Memory Segment [{shmSnapshot.baseAddress}]
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-tight">
+                    Shared Physical RAM Frame [{shmSnapshot.baseAddress}]
                   </h4>
-                  <span className="text-[10px] text-slate-400 font-mono">
-                    Zero-Copy RAM Frame mapped to both process address spaces
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                    Zero-copy memory block visible to both Process 1 and Process 2
                   </span>
                 </div>
               </div>
 
               {/* Mutex State Indicator */}
-              <div className="flex items-center gap-2 font-mono text-xs">
+              <div className="flex items-center gap-2 text-xs">
                 {shmSnapshot.mutex.locked ? (
-                  <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1 font-bold">
-                    <Lock className="w-3 h-3" /> LOCKED by {shmSnapshot.mutex.holder}
+                  <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-300 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/40 flex items-center gap-1.5 font-bold shadow-2xs">
+                    <Lock className="w-3.5 h-3.5" /> LOCKED by {shmSnapshot.mutex.holder}
                   </span>
                 ) : (
-                  <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1 font-semibold">
-                    <Unlock className="w-3 h-3" /> UNLOCKED (Free)
+                  <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/40 flex items-center gap-1.5 font-semibold shadow-2xs">
+                    <Unlock className="w-3.5 h-3.5" /> UNLOCKED (Free to acquire)
                   </span>
                 )}
               </div>
@@ -313,27 +303,27 @@ export const SharedMemorySimulator = () => {
 
             {/* Memory Word Values */}
             <div className="py-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="p-3 rounded-xl bg-dark-950 border border-slate-800 font-mono">
-                <span className="text-[10px] text-slate-500 block">OFFSET 0x00</span>
-                <span className="text-xs font-semibold text-slate-400">counter</span>
-                <div className="text-2xl font-black text-cyan-400 mt-1">
+              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-slate-800">
+                <span className="text-[10px] text-slate-400 font-mono block">OFFSET 0x00</span>
+                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">Shared Counter</span>
+                <div className="text-3xl font-extrabold text-sky-600 dark:text-cyan-400 mt-1 font-mono">
                   {shmSnapshot.memory.counter}
                 </div>
               </div>
 
-              <div className="p-3 rounded-xl bg-dark-950 border border-slate-800 font-mono">
-                <span className="text-[10px] text-slate-500 block">OFFSET 0x04</span>
-                <span className="text-xs font-semibold text-slate-400">lastUpdatedBy</span>
-                <div className="text-base font-bold text-purple-400 mt-2">
+              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-slate-800">
+                <span className="text-[10px] text-slate-400 font-mono block">OFFSET 0x04</span>
+                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">Last Writer</span>
+                <div className="text-base font-bold text-purple-600 dark:text-purple-400 mt-2 font-mono">
                   {shmSnapshot.memory.lastUpdatedBy}
                 </div>
               </div>
 
-              <div className="p-3 rounded-xl bg-dark-950 border border-slate-800 font-mono">
-                <span className="text-[10px] text-slate-500 block">OFFSET 0x08</span>
-                <span className="text-xs font-semibold text-slate-400">syncMode</span>
-                <div className={`text-sm font-bold mt-2 ${synchronized ? 'text-emerald-400' : 'text-rose-400'}`}>
-                  {synchronized ? 'MUTEX_LOCKED' : 'UNSYNCHRONIZED'}
+              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-slate-800">
+                <span className="text-[10px] text-slate-400 font-mono block">OFFSET 0x08</span>
+                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">Lock Protection</span>
+                <div className={`text-sm font-bold mt-2 ${synchronized ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                  {synchronized ? 'MUTEX LOCKED' : 'UNSYNCHRONIZED (RACE)'}
                 </div>
               </div>
             </div>
@@ -343,16 +333,16 @@ export const SharedMemorySimulator = () => {
               <motion.div
                 initial={{ opacity: 0, y: 5 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-3 rounded-lg bg-rose-950/40 border border-rose-500/50 text-rose-200 text-xs font-mono space-y-1 mt-2"
+                className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-500/50 text-rose-800 dark:text-rose-200 text-xs space-y-1.5 mt-2"
               >
-                <div className="flex items-center gap-2 font-bold text-rose-300">
-                  <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+                <div className="flex items-center gap-2 font-bold text-rose-700 dark:text-rose-300">
+                  <AlertTriangle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
                   <span>RACE CONDITION CONFIRMED (Lost Update)</span>
                 </div>
-                <div className="text-[11px] text-rose-200/90 pl-6">
+                <div className="text-[11px] text-rose-700 dark:text-rose-200/90 pl-6 leading-relaxed">
                   {raceConditionDetail.details}
                 </div>
-                <div className="text-[10px] text-rose-300 font-bold pl-6">
+                <div className="text-[11px] font-bold text-rose-800 dark:text-rose-300 pl-6 font-mono">
                   Expected value: {raceConditionDetail.expected} | Actual stored value: {raceConditionDetail.actual}
                 </div>
               </motion.div>
@@ -370,33 +360,33 @@ export const SharedMemorySimulator = () => {
 
         <div className="lg:col-span-4 space-y-4">
           {/* Synchronized vs Unsynchronized Deep Dive card */}
-          <div className="p-4 rounded-xl border border-slate-700/80 bg-dark-900/90 shadow-xl backdrop-blur-md space-y-3 text-xs font-mono">
-            <h4 className="font-bold text-white uppercase tracking-wider text-xs pb-2 border-b border-slate-800 flex items-center gap-2">
-              <Layers className="w-4 h-4 text-cyan-400" /> Synchronization State
+          <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-dark-900/90 shadow-sm backdrop-blur-md space-y-3.5 text-xs transition-colors">
+            <h4 className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs pb-2.5 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
+              <Layers className="w-4 h-4 text-sky-600 dark:text-cyan-400" /> Synchronization Mode
             </h4>
 
-            <div className="space-y-2 text-slate-300">
+            <div className="space-y-2 text-slate-600 dark:text-slate-300">
               <div className="flex items-center justify-between text-xs">
-                <span>Mutex Protocol:</span>
-                <span className={`font-bold ${synchronized ? 'text-emerald-400' : 'text-rose-400'}`}>
+                <span>Locking:</span>
+                <span className={`font-bold ${synchronized ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
                   {synchronized ? 'POSIX PTHREAD_MUTEX' : 'NONE (Race Prone)'}
                 </span>
               </div>
               <div className="flex items-center justify-between text-xs">
                 <span>Waiting Queue:</span>
-                <span className="text-slate-400 font-bold">
+                <span className="font-semibold text-slate-700 dark:text-slate-300">
                   {shmSnapshot.mutex.waitingCount} process(es)
                 </span>
               </div>
             </div>
 
-            <div className="pt-2 border-t border-slate-800">
+            <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800">
               <button
                 onClick={() => setSynchronized(!synchronized)}
-                className={`w-full py-2 px-3 rounded-lg font-bold text-xs font-mono transition-all border ${
+                className={`w-full py-2.5 px-3 rounded-xl font-bold text-xs transition-all border shadow-2xs ${
                   synchronized
-                    ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 hover:bg-rose-500/30'
-                    : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/30'
+                    ? 'bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/40'
+                    : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/40'
                 }`}
               >
                 {synchronized ? 'Disable Mutex (Demonstrate Race)' : 'Enable Mutex (Ensure Atomicity)'}
@@ -416,4 +406,3 @@ export const SharedMemorySimulator = () => {
     </div>
   );
 };
-

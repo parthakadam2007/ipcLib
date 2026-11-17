@@ -20,12 +20,22 @@ export function App() {
   const [activePage, setActivePage] = useState('dashboard');
   const [isLegendOpen, setIsLegendOpen] = useState(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
-  const [theme, setTheme] = useState('dark');
+  const [theme, setTheme] = useState(() => {
+    try {
+      const prefs = getPreferences();
+      return prefs.theme || 'light';
+    } catch {
+      return 'light';
+    }
+  });
 
   useEffect(() => {
-    const prefs = getPreferences();
-    if (prefs.theme) setTheme(prefs.theme);
-  }, []);
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [theme]);
 
   const handleNavigate = (pageId) => {
     setActivePage(pageId);
@@ -76,7 +86,7 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen bg-dark-950 text-slate-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-slate-50 dark:bg-dark-950 text-slate-800 dark:text-slate-100 flex flex-col font-sans transition-colors duration-150">
       {/* Top Navigation Bar */}
       <Navbar
         activePageTitle={activeNavItem.name}
@@ -97,16 +107,16 @@ export function App() {
         />
 
         {/* Central Workspace */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 bg-dark-950 grid-bg">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 bg-slate-50 dark:bg-dark-950 grid-bg">
           {/* Mobile hamburger banner */}
-          <div className="lg:hidden flex items-center justify-between pb-4 mb-4 border-b border-slate-800">
+          <div className="lg:hidden flex items-center justify-between pb-4 mb-4 border-b border-slate-200 dark:border-slate-800">
             <button
               onClick={() => setIsMobileNavOpen(true)}
-              className="px-3 py-1.5 rounded-lg bg-dark-900 border border-slate-700 text-xs font-mono text-cyan-300 font-semibold"
+              className="px-3 py-1.5 rounded-lg bg-white dark:bg-dark-900 border border-slate-300 dark:border-slate-700 text-xs font-sans text-sky-700 dark:text-cyan-300 font-semibold shadow-sm"
             >
               ☰ Open Menu
             </button>
-            <span className="text-xs font-mono text-slate-400">
+            <span className="text-xs font-sans text-slate-500 dark:text-slate-400">
               {activeNavItem.name}
             </span>
           </div>

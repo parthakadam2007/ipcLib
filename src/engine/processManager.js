@@ -10,38 +10,38 @@ export const PROCESS_STATES = {
 
 export const PROCESS_STATE_COLORS = {
   [PROCESS_STATES.READY]: {
-    bg: 'bg-sky-500/10',
-    border: 'border-sky-500/40',
-    text: 'text-sky-400',
-    badge: 'bg-sky-500/20 text-sky-300 border-sky-500/30',
+    bg: 'bg-sky-50 dark:bg-sky-500/10',
+    border: 'border-sky-300 dark:border-sky-500/40',
+    text: 'text-sky-700 dark:text-sky-400',
+    badge: 'bg-sky-100 text-sky-700 border-sky-300 dark:bg-sky-500/20 dark:text-sky-300 dark:border-sky-500/30',
     glow: 'rgba(56, 189, 248, 0.4)',
   },
   [PROCESS_STATES.RUNNING]: {
-    bg: 'bg-emerald-500/10',
-    border: 'border-emerald-500/50',
-    text: 'text-emerald-400',
-    badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+    bg: 'bg-emerald-50 dark:bg-emerald-500/10',
+    border: 'border-emerald-300 dark:border-emerald-500/50',
+    text: 'text-emerald-700 dark:text-emerald-400',
+    badge: 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30',
     glow: 'rgba(34, 197, 94, 0.5)',
   },
   [PROCESS_STATES.BLOCKED]: {
-    bg: 'bg-amber-500/10',
-    border: 'border-amber-500/50',
-    text: 'text-amber-400',
-    badge: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+    bg: 'bg-amber-50 dark:bg-amber-500/10',
+    border: 'border-amber-300 dark:border-amber-500/50',
+    text: 'text-amber-800 dark:text-amber-400',
+    badge: 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30',
     glow: 'rgba(245, 158, 11, 0.4)',
   },
   [PROCESS_STATES.WAITING]: {
-    bg: 'bg-yellow-500/10',
-    border: 'border-yellow-500/50',
-    text: 'text-yellow-400',
-    badge: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
+    bg: 'bg-yellow-50 dark:bg-yellow-500/10',
+    border: 'border-yellow-300 dark:border-yellow-500/50',
+    text: 'text-yellow-800 dark:text-yellow-400',
+    badge: 'bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-500/20 dark:text-yellow-300 dark:border-yellow-500/30',
     glow: 'rgba(234, 179, 8, 0.4)',
   },
   [PROCESS_STATES.TERMINATED]: {
-    bg: 'bg-rose-500/10',
-    border: 'border-rose-500/40',
-    text: 'text-rose-400',
-    badge: 'bg-rose-500/20 text-rose-300 border-rose-500/30',
+    bg: 'bg-rose-50 dark:bg-rose-500/10',
+    border: 'border-rose-300 dark:border-rose-500/40',
+    text: 'text-rose-700 dark:text-rose-400',
+    badge: 'bg-rose-100 text-rose-800 border-rose-300 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/30',
     glow: 'rgba(239, 68, 68, 0.3)',
   },
 };
@@ -102,4 +102,3 @@ export class Process {
     return p;
   }
 }
-

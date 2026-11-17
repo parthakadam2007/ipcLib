@@ -28,9 +28,9 @@ export const SocketSimulator = () => {
   const [inFlightPacket, setInFlightPacket] = useState(null);
 
   const [explanationInfo, setExplanationInfo] = useState({
-    title: 'BSD Sockets & TCP/IP Connection Lifecycle',
-    concept: 'Client-Server Network Communication',
-    explanation: 'Sockets provide a bidirectional communication endpoint. Before transmitting application data over TCP, client and server must perform the 3-Way Handshake (SYN -> SYN-ACK -> ACK).',
+    title: 'How Network Sockets Work',
+    concept: 'Client-Server Communication & Handshake',
+    explanation: 'Sockets allow processes on the same computer or across the internet to communicate. Over TCP, communication starts with the 3-Way Handshake (SYN -> SYN-ACK -> ACK) before sending data.',
     syscall: 'socket(AF_INET, SOCK_STREAM, 0); connect(sockfd, &serv_addr, len);',
     kernelAction: 'Client allocates ephemeral port and sends TCP SYN segment with initial sequence number'
   });
@@ -238,7 +238,6 @@ export const SocketSimulator = () => {
       status: 'success'
     });
 
-    // Simulate server response after brief flight
     setTimeout(() => {
       const responsePayload = `HTTP/1.1 200 OK [JSON: {"status":"healthy","load":0.14}]`;
       const resServer = sock.sendData('server', responsePayload);
@@ -346,7 +345,7 @@ export const SocketSimulator = () => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 max-w-7xl mx-auto">
       <SimulationControls
         isRunning={isRunning}
         onRun={run}
@@ -359,17 +358,17 @@ export const SocketSimulator = () => {
         activeScenarioId={activeScenario}
         onSelectScenario={handleSelectScenario}
         customControls={
-          <div className="flex items-center gap-2 text-xs font-mono">
+          <div className="flex items-center gap-2 text-xs">
             <button
               onClick={() => handleToggleServerOnline(!serverOnline)}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg border font-semibold ${
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-xl border font-semibold transition-colors shadow-2xs ${
                 serverOnline
-                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                  : 'bg-rose-500/20 text-rose-300 border-rose-500/40'
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/40'
+                  : 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/40'
               }`}
             >
-              {serverOnline ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
-              <span>{serverOnline ? 'Server Online' : 'Server Down'}</span>
+              {serverOnline ? <Wifi className="w-3.5 h-3.5" /> : <WifiOff className="w-3.5 h-3.5" />}
+              <span>{serverOnline ? 'Server Online (8080)' : 'Server Offline'}</span>
             </button>
           </div>
         }
@@ -384,12 +383,12 @@ export const SocketSimulator = () => {
               roleLabel="Client (127.0.0.1:54320)"
               customIcon={Laptop}
               extraDetails={
-                <div className="mt-3 pt-2 border-t border-slate-800 flex gap-2">
+                <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex gap-2">
                   {socketSnapshot.connectionState === SOCKET_STATES.CLOSED ? (
                     <button
                       onClick={() => handleHandshake()}
                       disabled={isRunning}
-                      className="flex-1 py-1.5 px-3 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs font-mono transition-all shadow-md glow-cyan disabled:opacity-50"
+                      className="flex-1 py-2 px-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs transition-all shadow-md shadow-sky-600/20 disabled:opacity-50"
                     >
                       Connect (SYN)
                     </button>
@@ -397,7 +396,7 @@ export const SocketSimulator = () => {
                     <button
                       onClick={() => handleServerAckSyn()}
                       disabled={isRunning}
-                      className="flex-1 py-1.5 px-3 rounded-lg bg-amber-500 text-slate-950 font-bold text-xs font-mono"
+                      className="flex-1 py-2 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs transition-colors"
                     >
                       Server SYN-ACK
                     </button>
@@ -405,7 +404,7 @@ export const SocketSimulator = () => {
                     <button
                       onClick={() => handleCompleteHandshake()}
                       disabled={isRunning}
-                      className="flex-1 py-1.5 px-3 rounded-lg bg-emerald-500 text-slate-950 font-bold text-xs font-mono"
+                      className="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-colors"
                     >
                       Complete (ACK)
                     </button>
@@ -414,14 +413,14 @@ export const SocketSimulator = () => {
                       <button
                         onClick={() => handleSendRequest()}
                         disabled={isRunning}
-                        className="flex-1 py-1.5 px-3 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs font-mono transition-all shadow-md glow-green disabled:opacity-50"
+                        className="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-all shadow-md shadow-emerald-600/20 disabled:opacity-50"
                       >
                         Send Request
                       </button>
                       <button
                         onClick={handleDisconnect}
                         disabled={isRunning}
-                        className="py-1.5 px-2.5 rounded-lg bg-dark-950 hover:bg-rose-950/40 text-rose-300 border border-slate-700 text-xs font-mono"
+                        className="py-2 px-3 rounded-xl bg-slate-100 hover:bg-rose-50 text-rose-600 dark:bg-dark-950 dark:hover:bg-rose-950/40 dark:text-rose-300 border border-slate-200 dark:border-slate-700 text-xs font-semibold"
                       >
                         Disconnect
                       </button>
@@ -437,9 +436,9 @@ export const SocketSimulator = () => {
               roleLabel="Server Daemon (127.0.0.1:8080)"
               customIcon={Server}
               extraDetails={
-                <div className="mt-3 pt-2 border-t border-slate-800 flex items-center justify-between text-xs font-mono text-slate-400">
+                <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
                   <span>Server Status:</span>
-                  <span className={`font-bold ${serverOnline ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  <span className={`font-bold ${serverOnline ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
                     {serverOnline ? 'ACTIVE (Port 8080)' : 'UNREACHABLE'}
                   </span>
                 </div>
@@ -454,21 +453,21 @@ export const SocketSimulator = () => {
             currentCount={socketSnapshot.connectionState === SOCKET_STATES.ESTABLISHED ? 1 : 0}
             inFlightPacket={inFlightPacket}
             customChildren={
-              <div className="w-full flex items-center justify-around py-2 font-mono text-xs">
+              <div className="w-full flex items-center justify-around py-3 font-mono text-xs">
                 <div className="text-center">
-                  <span className="text-[10px] text-slate-500 block">CLIENT SOCKET</span>
-                  <span className="text-cyan-400 font-bold">{socketSnapshot.client.state}</span>
+                  <span className="text-[10px] text-slate-400 block font-sans">CLIENT SOCKET</span>
+                  <span className="text-sky-700 dark:text-cyan-400 font-bold">{socketSnapshot.client.state}</span>
                 </div>
-                <div className="flex items-center gap-1 text-slate-400">
-                  <div className="w-12 h-0.5 bg-slate-700" />
-                  <span className="text-[10px] uppercase font-bold text-slate-300">
+                <div className="flex items-center gap-2 text-slate-400">
+                  <div className="w-12 h-0.5 bg-slate-300 dark:bg-slate-700" />
+                  <span className="text-[11px] uppercase font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-dark-950 px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-800">
                     {socketSnapshot.connectionState}
                   </span>
-                  <div className="w-12 h-0.5 bg-slate-700" />
+                  <div className="w-12 h-0.5 bg-slate-300 dark:bg-slate-700" />
                 </div>
                 <div className="text-center">
-                  <span className="text-[10px] text-slate-500 block">SERVER SOCKET</span>
-                  <span className="text-emerald-400 font-bold">{socketSnapshot.server.state}</span>
+                  <span className="text-[10px] text-slate-400 block font-sans">SERVER SOCKET</span>
+                  <span className="text-emerald-700 dark:text-emerald-400 font-bold">{socketSnapshot.server.state}</span>
                 </div>
               </div>
             }
@@ -484,29 +483,29 @@ export const SocketSimulator = () => {
         </div>
 
         <div className="lg:col-span-4 space-y-4">
-          <div className="p-4 rounded-xl border border-slate-700/80 bg-dark-900/90 shadow-xl backdrop-blur-md space-y-3 text-xs font-mono">
-            <h4 className="font-bold text-white uppercase tracking-wider text-xs pb-2 border-b border-slate-800 flex items-center gap-2">
-              <Network className="w-4 h-4 text-cyan-400" /> Request Payload
+          <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-dark-900/90 shadow-sm backdrop-blur-md space-y-3.5 text-xs transition-colors">
+            <h4 className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs pb-2.5 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
+              <Network className="w-4 h-4 text-sky-600 dark:text-cyan-400" /> Request Payload
             </h4>
 
             <div>
-              <label className="text-[11px] text-slate-400 block mb-1">HTTP / RPC Request Payload:</label>
+              <label className="text-[11px] font-medium text-slate-500 dark:text-slate-400 block mb-1">HTTP / RPC Request Payload:</label>
               <input
                 type="text"
                 value={requestText}
                 onChange={(e) => setRequestText(e.target.value)}
-                className="w-full bg-dark-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-200 focus:outline-none focus:border-cyan-400 text-xs"
+                className="w-full bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-400 text-xs transition-all"
               />
             </div>
 
-            <div className="pt-2 border-t border-slate-800 space-y-1 text-slate-300">
+            <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800 space-y-1.5 text-slate-600 dark:text-slate-300">
               <div className="flex justify-between">
-                <span className="text-slate-400">Socket Protocol:</span>
-                <span className="text-cyan-400 font-bold">AF_INET / SOCK_STREAM</span>
+                <span>Protocol:</span>
+                <span className="text-sky-700 dark:text-cyan-400 font-bold font-mono">AF_INET / SOCK_STREAM</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Port Mapping:</span>
-                <span>54320 → 8080</span>
+                <span>Endpoints:</span>
+                <span className="font-mono">54320 → 8080</span>
               </div>
             </div>
           </div>
@@ -523,4 +522,3 @@ export const SocketSimulator = () => {
     </div>
   );
 };
-

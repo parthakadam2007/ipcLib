@@ -26,7 +26,7 @@ export const ProducerConsumerLab = () => {
   const [bufferSnapshot, setBufferSnapshot] = useState(modelRef.current.getSnapshot());
 
   const [explanationInfo, setExplanationInfo] = useState({
-    title: 'The Bounded-Buffer Producer–Consumer Problem',
+    title: 'How Producer-Consumer Works',
     concept: 'Dijkstra Semaphores & Circular Buffer',
     explanation: 'Uses counting semaphore "empty" to track free slots, counting semaphore "full" to track filled slots, and binary semaphore "mutex" to serialize buffer pointer mutations.',
     syscall: 'sem_wait(&empty); sem_wait(&mutex); ... sem_post(&mutex); sem_post(&full);',
@@ -34,7 +34,6 @@ export const ProducerConsumerLab = () => {
   });
 
   const handleAutoStep = useCallback((stepNumber, logger) => {
-    // Alternate or probabilistically choose produce vs consume
     if (Math.random() > 0.45) {
       handleProduce(logger, stepNumber);
     } else {
@@ -94,7 +93,6 @@ export const ProducerConsumerLab = () => {
       return;
     }
 
-    // Unblock consumer if it was blocked
     setConsumer((prev) => (prev.state === PROCESS_STATES.BLOCKED ? prev.clone() : prev));
 
     setProducer((prev) => {
@@ -149,7 +147,6 @@ export const ProducerConsumerLab = () => {
       return;
     }
 
-    // Unblock producer if blocked
     setProducer((prev) => (prev.state === PROCESS_STATES.BLOCKED ? prev.clone() : prev));
 
     setConsumer((prev) => {
@@ -212,7 +209,7 @@ export const ProducerConsumerLab = () => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 max-w-7xl mx-auto">
       <SimulationControls
         isRunning={isRunning}
         onRun={run}
@@ -225,15 +222,15 @@ export const ProducerConsumerLab = () => {
         activeScenarioId={activeScenario}
         onSelectScenario={handleSelectScenario}
         customControls={
-          <div className="flex items-center gap-2 text-xs font-mono">
-            <span className="text-slate-400">Sync:</span>
+          <div className="flex items-center gap-2 text-xs">
+            <span className="text-slate-500 dark:text-slate-400 font-medium">Sync:</span>
             <select
               value={syncMode}
               onChange={(e) => handleSyncChange(e.target.value)}
-              className="bg-dark-950 border border-slate-700 rounded-lg px-2 py-1 text-cyan-300 font-semibold focus:outline-none"
+              className="bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1 text-sky-700 dark:text-cyan-300 font-bold focus:outline-none"
             >
               <option value="SEMAPHORES">Dijkstra Semaphores (Safe)</option>
-              <option value="MUTEX_ONLY">Mutex Only (No Semaphores)</option>
+              <option value="MUTEX_ONLY">Mutex Only (No Counters)</option>
               <option value="NONE">None (Race Condition Demo)</option>
             </select>
           </div>
@@ -249,11 +246,11 @@ export const ProducerConsumerLab = () => {
               roleLabel="Producer Process"
               customIcon={Cpu}
               extraDetails={
-                <div className="mt-3 pt-2 border-t border-slate-800">
+                <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800">
                   <button
                     onClick={() => handleProduce()}
                     disabled={isRunning}
-                    className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs font-mono transition-all shadow-md glow-cyan disabled:opacity-50"
+                    className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs transition-all shadow-md shadow-sky-600/20 disabled:opacity-50"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Produce Item</span>
@@ -268,11 +265,11 @@ export const ProducerConsumerLab = () => {
               roleLabel="Consumer Process"
               customIcon={Cpu}
               extraDetails={
-                <div className="mt-3 pt-2 border-t border-slate-800">
+                <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800">
                   <button
                     onClick={() => handleConsume()}
                     disabled={isRunning}
-                    className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs font-mono transition-all shadow-md glow-green disabled:opacity-50"
+                    className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-all shadow-md shadow-emerald-600/20 disabled:opacity-50"
                   >
                     <Minus className="w-3.5 h-3.5" />
                     <span>Consume Item</span>
@@ -283,38 +280,38 @@ export const ProducerConsumerLab = () => {
           </div>
 
           {/* Circular Bounded Buffer Visualization */}
-          <div className="rounded-xl border border-slate-700/80 bg-dark-900/90 p-4 shadow-xl backdrop-blur-md">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
+          <div className="rounded-2xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-dark-900/90 p-4 shadow-sm backdrop-blur-md transition-colors">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-sky-50 dark:bg-cyan-500/10 border border-sky-200 dark:border-cyan-500/30 text-sky-600 dark:text-cyan-400">
                   <Layers className="w-4 h-4" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-white font-mono uppercase">
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-tight">
                     Bounded Circular Buffer (Capacity: {capacity})
                   </h4>
-                  <span className="text-[10px] text-slate-400 font-mono">
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400">
                     Pointers: in={bufferSnapshot.inIndex} (next write) | out={bufferSnapshot.outIndex} (next read)
                   </span>
                 </div>
               </div>
 
               {/* Semaphore counters display */}
-              <div className="flex items-center gap-2 text-xs font-mono">
-                <span className="px-2 py-0.5 rounded bg-sky-950 border border-sky-800 text-sky-300">
+              <div className="flex items-center gap-2 text-xs font-mono font-medium">
+                <span className="px-2.5 py-1 rounded-full bg-sky-100 text-sky-800 border border-sky-200 dark:bg-sky-950 dark:border-sky-800 dark:text-sky-300">
                   empty: {bufferSnapshot.semaphores.empty}
                 </span>
-                <span className="px-2 py-0.5 rounded bg-emerald-950 border border-emerald-800 text-emerald-300">
+                <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 dark:bg-emerald-950 dark:border-emerald-800 dark:text-emerald-300">
                   full: {bufferSnapshot.semaphores.full}
                 </span>
-                <span className="px-2 py-0.5 rounded bg-amber-950 border border-amber-800 text-amber-300">
+                <span className="px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-200 dark:bg-amber-950 dark:border-amber-800 dark:text-amber-300">
                   mutex: {bufferSnapshot.semaphores.mutex}
                 </span>
               </div>
             </div>
 
             {/* Circular Buffer Slots Array */}
-            <div className="py-5 flex items-center justify-center gap-2 flex-wrap">
+            <div className="py-6 flex items-center justify-center gap-3 flex-wrap">
               {bufferSnapshot.slots.map((slotItem, idx) => {
                 const isOccupied = slotItem !== null;
                 const isInTarget = bufferSnapshot.inIndex === idx;
@@ -322,19 +319,20 @@ export const ProducerConsumerLab = () => {
 
                 return (
                   <div key={idx} className="flex flex-col items-center">
-                    <div className="flex gap-1 mb-1 text-[9px] font-mono">
-                      {isInTarget && <span className="text-cyan-400 font-bold">IN▲</span>}
-                      {isOutTarget && <span className="text-emerald-400 font-bold">OUT▲</span>}
+                    <div className="flex gap-1 mb-1 text-[10px] font-mono font-bold">
+                      {isInTarget && <span className="text-sky-600 dark:text-cyan-400">IN ▲</span>}
+                      {isOutTarget && <span className="text-emerald-600 dark:text-emerald-400">OUT ▲</span>}
+                      {!isInTarget && !isOutTarget && <span className="opacity-0">-</span>}
                     </div>
 
                     <div
-                      className={`w-14 h-14 rounded-xl flex flex-col items-center justify-center font-mono text-xs border-2 transition-all ${
+                      className={`w-16 h-16 rounded-2xl flex flex-col items-center justify-center font-mono text-xs border-2 transition-all shadow-2xs ${
                         isOccupied
-                          ? 'bg-cyan-500/20 border-cyan-400 text-cyan-200 shadow-md glow-cyan font-bold'
-                          : 'bg-dark-950 border-slate-800 text-slate-600'
+                          ? 'bg-sky-50 border-sky-400 text-sky-800 dark:bg-cyan-500/20 dark:border-cyan-400 dark:text-cyan-200 font-bold'
+                          : 'bg-slate-50 border-slate-200 text-slate-400 dark:bg-dark-950 dark:border-slate-800 dark:text-slate-600'
                       }`}
                     >
-                      <span className="text-[9px] text-slate-500">[{idx}]</span>
+                      <span className="text-[10px] text-slate-400">Slot {idx}</span>
                       <span className="text-xs truncate px-1">
                         {isOccupied ? slotItem.val : 'EMPTY'}
                       </span>
@@ -346,8 +344,8 @@ export const ProducerConsumerLab = () => {
 
             {/* Warning or Race Banner */}
             {bufferSnapshot.raceConditionDetected && (
-              <div className="mt-2 p-2.5 rounded-lg bg-rose-950/40 border border-rose-500/50 text-rose-200 text-xs font-mono flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+              <div className="mt-2 p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-500/50 text-rose-800 dark:text-rose-200 text-xs flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
                 <span>{bufferSnapshot.raceMessage || 'RACE CONDITION DETECTED!'}</span>
               </div>
             )}
@@ -363,35 +361,35 @@ export const ProducerConsumerLab = () => {
         </div>
 
         <div className="lg:col-span-4 space-y-4">
-          <div className="p-4 rounded-xl border border-slate-700/80 bg-dark-900/90 shadow-xl backdrop-blur-md space-y-3 text-xs font-mono">
-            <h4 className="font-bold text-white uppercase tracking-wider text-xs pb-2 border-b border-slate-800 flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-cyan-400" /> Synchronization Model
+          <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-dark-900/90 shadow-sm backdrop-blur-md space-y-3.5 text-xs transition-colors">
+            <h4 className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs pb-2.5 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-sky-600 dark:text-cyan-400" /> Synchronization Model
             </h4>
 
-            <div className="space-y-2 text-slate-300">
+            <div className="space-y-2 text-slate-600 dark:text-slate-300">
               <div className="flex justify-between">
-                <span className="text-slate-400">Buffer Slots:</span>
-                <span className="font-bold text-white">{bufferSnapshot.count} / {capacity}</span>
+                <span>Buffer Slots:</span>
+                <span className="font-bold text-slate-900 dark:text-white font-mono">{bufferSnapshot.count} / {capacity}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Total Produced:</span>
-                <span className="text-cyan-400 font-bold">{bufferSnapshot.producedCount}</span>
+                <span>Total Produced:</span>
+                <span className="text-sky-700 dark:text-cyan-400 font-bold font-mono">{bufferSnapshot.producedCount}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Total Consumed:</span>
-                <span className="text-emerald-400 font-bold">{bufferSnapshot.consumedCount}</span>
+                <span>Total Consumed:</span>
+                <span className="text-emerald-700 dark:text-emerald-400 font-bold font-mono">{bufferSnapshot.consumedCount}</span>
               </div>
             </div>
 
-            <div className="pt-2 border-t border-slate-800">
-              <label className="text-[11px] text-slate-400 block mb-1">Adjust Buffer Size:</label>
+            <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800">
+              <label className="text-[11px] font-medium text-slate-500 dark:text-slate-400 block mb-1">Adjust Buffer Size:</label>
               <input
                 type="range"
                 min="2"
                 max="8"
                 value={capacity}
                 onChange={(e) => handleCapacityChange(e.target.value)}
-                className="w-full accent-cyan-400 cursor-pointer"
+                className="w-full accent-sky-600 dark:accent-cyan-400 cursor-pointer"
               />
             </div>
           </div>
@@ -408,4 +406,3 @@ export const ProducerConsumerLab = () => {
     </div>
   );
 };
-

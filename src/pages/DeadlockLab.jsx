@@ -15,15 +15,14 @@ export const DeadlockLab = () => {
   const [activeScenario, setActiveScenario] = useState('');
 
   const [explanationInfo, setExplanationInfo] = useState({
-    title: 'Resource Allocation Graph & Coffman Conditions',
-    concept: 'Deadlock Detection and Prevention',
-    explanation: 'A deadlock occurs when processes form a circular wait chain, each holding a non-preemptible resource while requesting another held by the next process.',
+    title: 'How Deadlock & Circular Wait Occur',
+    concept: 'Deadlock Detection & The 4 Coffman Conditions',
+    explanation: 'A deadlock happens when two or more processes each hold a resource the other needs and neither can make progress. Both processes remain permanently frozen waiting for each other.',
     syscall: 'pthread_mutex_lock(&res1); pthread_mutex_lock(&res2);',
     kernelAction: 'Scheduler detects all threads blocked on unavailable mutex locks'
   });
 
   const handleAutoStep = useCallback((stepNumber, logger) => {
-    // If not deadlocked, attempt a resource request
     const dm = modelRef.current;
     if (!dm.deadlockDetected) {
       const pId = Math.random() > 0.5 ? 'P1' : 'P2';
@@ -87,7 +86,7 @@ export const DeadlockLab = () => {
       setExplanationInfo({
         title: 'DEADLOCK CONFIRMED: Circular Wait Detected',
         concept: 'The 4 Coffman Conditions',
-        explanation: `A cycle has formed in the Resource Allocation Graph (${updated.deadlockCycle.join(' → ')}). Neither process can proceed, causing permanent freeze.`,
+        explanation: `A cycle has formed in the Resource Allocation Graph (${updated.deadlockCycle.join(' → ')}). Neither process can proceed, causing a permanent freeze.`,
         syscall: 'pthread_mutex_lock() -> deadlock permanent hang',
         kernelAction: 'Processes blocked indefinitely; kernel deadlock watchdog triggered'
       });
@@ -116,7 +115,7 @@ export const DeadlockLab = () => {
     logger.log({
       step: 1,
       process: 'KERNEL',
-      operation: 'Scenario Loaded: Circular Wait Deadlock',
+      operation: 'Scenario: Circular Wait Deadlock',
       details: 'P1 holds R1, requests R2. P2 holds R2, requests R1. Deadlock established.',
       status: 'error'
     });
@@ -138,7 +137,7 @@ export const DeadlockLab = () => {
     logger.log({
       step: 1,
       process: 'KERNEL',
-      operation: 'Scenario Loaded: Hierarchical Resource Ordering',
+      operation: 'Scenario: Hierarchical Resource Ordering',
       details: 'Strict ordering rule (R1 before R2) eliminates cycle. Execution completes safely.',
       status: 'success'
     });
@@ -160,7 +159,7 @@ export const DeadlockLab = () => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 max-w-7xl mx-auto">
       <SimulationControls
         isRunning={isRunning}
         onRun={run}
@@ -173,13 +172,13 @@ export const DeadlockLab = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={handleLoadClassicDeadlock}
-              className="px-2.5 py-1 rounded-lg bg-rose-500/20 text-rose-300 border border-rose-500/40 hover:bg-rose-500/30 font-mono text-xs font-semibold"
+              className="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/40 text-xs font-semibold shadow-2xs transition-colors"
             >
               Trigger Deadlock
             </button>
             <button
               onClick={handleLoadCorrected}
-              className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30 font-mono text-xs font-semibold"
+              className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/40 text-xs font-semibold shadow-2xs transition-colors"
             >
               Corrected Ordering
             </button>
@@ -190,28 +189,28 @@ export const DeadlockLab = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         <div className="lg:col-span-8 space-y-4">
           {/* Resource Allocation Graph (RAG) Visual Workspace */}
-          <div className="rounded-xl border border-slate-700/80 bg-dark-900/90 p-4 shadow-xl backdrop-blur-md">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400">
+          <div className="rounded-2xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-dark-900/90 p-4 shadow-sm backdrop-blur-md transition-colors">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 text-rose-600 dark:text-rose-400">
                   <ShieldAlert className="w-4 h-4" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-white font-mono uppercase">
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-tight">
                     Resource Allocation Graph (RAG)
                   </h4>
-                  <span className="text-[10px] text-slate-400 font-mono">
-                    Directed Graph: Circles = Processes, Rectangles = Mutex Resources
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                    Processes request and hold exclusive Mutex Resources
                   </span>
                 </div>
               </div>
 
               {snapshot.deadlockDetected ? (
-                <span className="px-2.5 py-0.5 rounded-full bg-rose-500 text-slate-950 font-bold text-xs font-mono animate-pulse">
+                <span className="px-3 py-1 rounded-full bg-rose-600 text-white font-bold text-xs shadow-md animate-pulse">
                   ⚠ DEADLOCK DETECTED!
                 </span>
               ) : (
-                <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold text-xs font-mono">
+                <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30 font-semibold text-xs shadow-2xs">
                   ✓ SAFE STATE (No Cycles)
                 </span>
               )}
@@ -221,7 +220,7 @@ export const DeadlockLab = () => {
             <div className="py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Processes Column */}
               <div className="space-y-3">
-                <span className="text-[11px] font-mono uppercase text-slate-400 font-bold block">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
                   Processes
                 </span>
                 {snapshot.processes.slice(0, 2).map((proc) => {
@@ -231,45 +230,45 @@ export const DeadlockLab = () => {
                   return (
                     <div
                       key={proc.id}
-                      className={`p-3 rounded-xl border font-mono text-xs transition-all ${
+                      className={`p-3.5 rounded-2xl border text-xs transition-all ${
                         isDeadlocked
-                          ? 'bg-rose-950/40 border-rose-500 shadow-md glow-amber'
+                          ? 'bg-rose-50 dark:bg-rose-950/40 border-rose-400 shadow-sm'
                           : isBlocked
-                          ? 'bg-amber-950/20 border-amber-500/50'
-                          : 'bg-dark-950 border-slate-800'
+                          ? 'bg-amber-50 dark:bg-amber-950/20 border-amber-300'
+                          : 'bg-slate-50 dark:bg-dark-950 border-slate-200 dark:border-slate-800'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <span className="font-bold text-white text-sm">{proc.name}</span>
+                        <span className="font-bold text-slate-900 dark:text-white text-sm">{proc.name}</span>
                         <span
-                          className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                            isBlocked ? 'bg-amber-500/20 text-amber-300' : 'bg-emerald-500/20 text-emerald-300'
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                            isBlocked ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
                           }`}
                         >
                           {proc.state}
                         </span>
                       </div>
 
-                      <div className="text-[11px] space-y-1 text-slate-300">
+                      <div className="text-xs space-y-1 text-slate-600 dark:text-slate-300">
                         <div>
-                          Holding: <strong className="text-cyan-400">{proc.holding.join(', ') || 'None'}</strong>
+                          Holding: <strong className="text-sky-700 dark:text-cyan-400 font-mono">{proc.holding.join(', ') || 'None'}</strong>
                         </div>
                         <div>
-                          Waiting For: <strong className="text-amber-400">{proc.waitingFor || 'None'}</strong>
+                          Waiting For: <strong className="text-amber-700 dark:text-amber-400 font-mono">{proc.waitingFor || 'None'}</strong>
                         </div>
                       </div>
 
                       {/* Request action buttons */}
-                      <div className="mt-3 pt-2 border-t border-slate-800 flex gap-2">
+                      <div className="mt-3 pt-2.5 border-t border-slate-200 dark:border-slate-800 flex gap-2">
                         <button
                           onClick={() => handleRequest(proc.id, 'R1')}
-                          className="px-2 py-1 rounded bg-dark-900 hover:bg-slate-800 border border-slate-700 text-[10px] text-slate-200"
+                          className="px-2.5 py-1 rounded-lg bg-white dark:bg-dark-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors shadow-2xs"
                         >
                           Request R1
                         </button>
                         <button
                           onClick={() => handleRequest(proc.id, 'R2')}
-                          className="px-2 py-1 rounded bg-dark-900 hover:bg-slate-800 border border-slate-700 text-[10px] text-slate-200"
+                          className="px-2.5 py-1 rounded-lg bg-white dark:bg-dark-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors shadow-2xs"
                         >
                           Request R2
                         </button>
@@ -281,7 +280,7 @@ export const DeadlockLab = () => {
 
               {/* Resources Column */}
               <div className="space-y-3">
-                <span className="text-[11px] font-mono uppercase text-slate-400 font-bold block">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
                   Resources (Mutex Locks)
                 </span>
                 {snapshot.resources.slice(0, 2).map((res) => {
@@ -290,15 +289,15 @@ export const DeadlockLab = () => {
                   return (
                     <div
                       key={res.id}
-                      className={`p-3 rounded-xl border font-mono text-xs transition-all ${
-                        isHeld ? 'bg-cyan-950/30 border-cyan-500/40' : 'bg-dark-950 border-slate-800'
+                      className={`p-3.5 rounded-2xl border text-xs transition-all ${
+                        isHeld ? 'bg-sky-50 dark:bg-cyan-950/30 border-sky-300 dark:border-cyan-500/40' : 'bg-slate-50 dark:bg-dark-950 border-slate-200 dark:border-slate-800'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <span className="font-bold text-white text-sm">{res.name}</span>
+                        <span className="font-bold text-slate-900 dark:text-white text-sm">{res.name}</span>
                         <span
-                          className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                            isHeld ? 'bg-cyan-500/20 text-cyan-300' : 'bg-slate-800 text-slate-400'
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                            isHeld ? 'bg-sky-100 text-sky-800 border border-sky-200' : 'bg-slate-200 text-slate-600'
                           }`}
                         >
                           {isHeld ? `HELD BY ${res.heldBy}` : 'AVAILABLE'}
@@ -306,12 +305,12 @@ export const DeadlockLab = () => {
                       </div>
 
                       {isHeld && (
-                        <div className="mt-2 pt-2 border-t border-slate-800 flex justify-end">
+                        <div className="mt-2.5 pt-2 border-t border-slate-200 dark:border-slate-800 flex justify-end">
                           <button
                             onClick={() => handleRelease(res.heldBy, res.id)}
-                            className="px-2.5 py-1 rounded bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-[10px] font-bold"
+                            className="px-3 py-1 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-500/20 dark:text-rose-300 text-xs font-semibold transition-colors"
                           >
-                            Force Release ({res.heldBy})
+                            Release ({res.heldBy})
                           </button>
                         </div>
                       )}
@@ -333,36 +332,36 @@ export const DeadlockLab = () => {
 
         <div className="lg:col-span-4 space-y-4">
           {/* Coffman Conditions Checklist Card */}
-          <div className="p-4 rounded-xl border border-slate-700/80 bg-dark-900/90 shadow-xl backdrop-blur-md space-y-3 text-xs font-mono">
-            <h4 className="font-bold text-white uppercase tracking-wider text-xs pb-2 border-b border-slate-800 flex items-center gap-2">
-              <BookOpen className="w-4 h-4 text-cyan-400" /> The 4 Coffman Conditions
+          <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-dark-900/90 shadow-sm backdrop-blur-md space-y-3.5 text-xs transition-colors">
+            <h4 className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs pb-2.5 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
+              <BookOpen className="w-4 h-4 text-sky-600 dark:text-cyan-400" /> The 4 Coffman Conditions
             </h4>
 
-            <div className="space-y-2 text-slate-300">
+            <div className="space-y-2 text-slate-600 dark:text-slate-300">
               <div className="flex items-center justify-between">
                 <span>1. Mutual Exclusion:</span>
-                <span className="text-emerald-400 font-bold">YES (Exclusive)</span>
+                <span className="text-emerald-700 dark:text-emerald-400 font-bold">YES (Exclusive)</span>
               </div>
               <div className="flex items-center justify-between">
                 <span>2. Hold and Wait:</span>
-                <span className={`font-bold ${snapshot.coffmanConditions.holdAndWait ? 'text-rose-400' : 'text-slate-500'}`}>
+                <span className={`font-bold ${snapshot.coffmanConditions.holdAndWait ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`}>
                   {snapshot.coffmanConditions.holdAndWait ? 'ACTIVE' : 'INACTIVE'}
                 </span>
               </div>
               <div className="flex items-center justify-between">
                 <span>3. No Preemption:</span>
-                <span className="text-emerald-400 font-bold">YES (Protected)</span>
+                <span className="text-emerald-700 dark:text-emerald-400 font-bold">YES (Protected)</span>
               </div>
               <div className="flex items-center justify-between">
                 <span>4. Circular Wait:</span>
-                <span className={`font-bold ${snapshot.coffmanConditions.circularWait ? 'text-rose-400' : 'text-slate-500'}`}>
+                <span className={`font-bold ${snapshot.coffmanConditions.circularWait ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`}>
                   {snapshot.coffmanConditions.circularWait ? 'CYCLE DETECTED' : 'NONE'}
                 </span>
               </div>
             </div>
 
-            <p className="text-[10px] text-slate-400 leading-tight pt-2 border-t border-slate-800">
-              Deadlock occurs if and only if ALL four conditions hold simultaneously in a single-instance resource system.
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed pt-2.5 border-t border-slate-100 dark:border-slate-800">
+              Deadlock occurs if and only if ALL four conditions hold simultaneously in a single-instance system.
             </p>
           </div>
 
@@ -378,4 +377,3 @@ export const DeadlockLab = () => {
     </div>
   );
 };
-
