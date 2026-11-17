@@ -44,3 +44,4 @@ export const exportLogToTxt = (logs, mechanismName) => {
   downloadAnchor.click();
   downloadAnchor.remove();
 };
+

@@ -34,3 +34,4 @@ export const StatusBadge = ({ state = PROCESS_STATES.READY, size = 'sm' }) => {
     </span>
   );
 };
+

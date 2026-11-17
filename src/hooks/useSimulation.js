@@ -99,3 +99,4 @@ export const useSimulation = ({ onStepExecute, initialSpeed = 1 } = {}) => {
     logger: loggerRef.current
   };
 };
+

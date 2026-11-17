@@ -157,3 +157,4 @@ export const IPC_MODELS_SUMMARY = {
     cons: 'Programmer is entirely responsible for synchronization (mutexes/semaphores) to avoid race conditions.'
   }
 };
+

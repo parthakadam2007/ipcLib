@@ -104,3 +104,4 @@ export const saveQuizScore = (quizId, score, total) => {
     console.warn(e);
   }
 };
+

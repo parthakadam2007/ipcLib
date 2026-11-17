@@ -162,3 +162,4 @@ src/
 
 ## ⚖️ Educational Notice
 This application is a **conceptual simulator** built for educational purposes. It models authentic POSIX system call semantics and operating system concepts within a web-based JavaScript engine. It does not spawn native operating system processes or modify the host operating system.
+

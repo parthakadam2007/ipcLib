@@ -168,3 +168,4 @@ export const Comparison = ({ onSelectMechanism }) => {
     </div>
   );
 };
+

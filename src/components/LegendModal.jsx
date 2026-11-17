@@ -119,3 +119,4 @@ export const LegendModal = ({ isOpen, onClose }) => {
     </div>
   );
 };
+
